@@ -1,0 +1,4659 @@
+
+
+
+
+
+
+Network Working Group                                    P. Resnick, Ed.
+Request for Comments: 5322                         Qualcomm Incorporated
+Obsoletes: 2822                                             October 2008
+Updates: 4021
+Category: Standards Track
+
+
+                        Internet Message Format
+                       インターネットメッセージフォーマット
+
+Status of This Memo
+この文書の状況
+
+   This document specifies an Internet standards track protocol for the
+   Internet community, and requests discussion and suggestions for
+   improvements.  Please refer to the current edition of the "Internet
+   Official Protocol Standards" (STD 1) for the standardization state
+   and status of this protocol.  Distribution of this memo is unlimited.
+
+   このドキュメントはインターネットコミュニティのためのインターネット
+   スタンダードトラックプロトコルの仕様を定め、改善に向けた議論と提案
+   を求めている。このプロトコルの標準化の状態と状況は"Internet
+   Official Protocol Standards"(STD1)の現在のエディションを参照してほ
+   しい。この文書の配布に制限は無い。
+
+Abstract
+概要
+
+   This document specifies the Internet Message Format (IMF), a syntax
+   for text messages that are sent between computer users, within the
+   framework of "electronic mail" messages.  This specification is a
+   revision of Request For Comments (RFC) 2822, which itself superseded
+   Request For Comments (RFC) 822, "Standard for the Format of ARPA
+   Internet Text Messages", updating it to reflect current practice and
+   incorporating incremental changes that wobere specified in other RFCs.
+
+   このドキュメントでは、Internet Message Format (IMF)、コンピューター
+   ユーザー間で送られるメッセージ"電子メール"の文法の仕様を定める。こ
+   の仕様は、Request For Comments（以下RFC） 2822の改訂版であり、
+   RFC2822は現在の慣例を反映し、他のRFCで規定された変更分も含むことで、
+   RFC822（"Standard for thr Format ARPA Internet Text Message"）に取っ
+   て代わるものである。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Resnick                     Standards Track                     [Page 1]
+
+RFC 5322                Internet Message Format             October 2008
+
+
+Table of Contents
+
+   1.  Introduction . . . . . . . . . . . . . . . . . . . . . . . . .  4
+     1.1.  Scope  . . . . . . . . . . . . . . . . . . . . . . . . . .  4
+     1.2.  Notational Conventions . . . . . . . . . . . . . . . . . .  5
+       1.2.1.  Requirements Notation  . . . . . . . . . . . . . . . .  5
+       1.2.2.  Syntactic Notation . . . . . . . . . . . . . . . . . .  5
+       1.2.3.  Structure of This Document . . . . . . . . . . . . . .  5
+   2.  Lexical Analysis of Messages . . . . . . . . . . . . . . . . .  6
+     2.1.  General Description  . . . . . . . . . . . . . . . . . . .  6
+       2.1.1.  Line Length Limits . . . . . . . . . . . . . . . . . .  7
+     2.2.  Header Fields  . . . . . . . . . . . . . . . . . . . . . .  8
+       2.2.1.  Unstructured Header Field Bodies . . . . . . . . . . .  8
+       2.2.2.  Structured Header Field Bodies . . . . . . . . . . . .  8
+       2.2.3.  Long Header Fields . . . . . . . . . . . . . . . . . .  8
+     2.3.  Body . . . . . . . . . . . . . . . . . . . . . . . . . . .  9
+   3.  Syntax . . . . . . . . . . . . . . . . . . . . . . . . . . . . 10
+     3.1.  Introduction . . . . . . . . . . . . . . . . . . . . . . . 10
+     3.2.  Lexical Tokens . . . . . . . . . . . . . . . . . . . . . . 10
+       3.2.1.  Quoted characters  . . . . . . . . . . . . . . . . . . 10
+       3.2.2.  Folding White Space and Comments . . . . . . . . . . . 11
+       3.2.3.  Atom . . . . . . . . . . . . . . . . . . . . . . . . . 12
+       3.2.4.  Quoted Strings . . . . . . . . . . . . . . . . . . . . 13
+       3.2.5.  Miscellaneous Tokens . . . . . . . . . . . . . . . . . 14
+     3.3.  Date and Time Specification  . . . . . . . . . . . . . . . 14
+     3.4.  Address Specification  . . . . . . . . . . . . . . . . . . 16
+       3.4.1.  Addr-Spec Specification  . . . . . . . . . . . . . . . 17
+     3.5.  Overall Message Syntax . . . . . . . . . . . . . . . . . . 18
+     3.6.  Field Definitions  . . . . . . . . . . . . . . . . . . . . 19
+       3.6.1.  The Origination Date Field . . . . . . . . . . . . . . 22
+       3.6.2.  Originator Fields  . . . . . . . . . . . . . . . . . . 22
+       3.6.3.  Destination Address Fields . . . . . . . . . . . . . . 23
+       3.6.4.  Identification Fields  . . . . . . . . . . . . . . . . 25
+       3.6.5.  Informational Fields . . . . . . . . . . . . . . . . . 27
+       3.6.6.  Resent Fields  . . . . . . . . . . . . . . . . . . . . 28
+       3.6.7.  Trace Fields . . . . . . . . . . . . . . . . . . . . . 30
+       3.6.8.  Optional Fields  . . . . . . . . . . . . . . . . . . . 30
+   4.  Obsolete Syntax  . . . . . . . . . . . . . . . . . . . . . . . 31
+     4.1.  Miscellaneous Obsolete Tokens  . . . . . . . . . . . . . . 32
+     4.2.  Obsolete Folding White Space . . . . . . . . . . . . . . . 33
+     4.3.  Obsolete Date and Time . . . . . . . . . . . . . . . . . . 33
+     4.4.  Obsolete Addressing  . . . . . . . . . . . . . . . . . . . 35
+     4.5.  Obsolete Header Fields . . . . . . . . . . . . . . . . . . 35
+       4.5.1.  Obsolete Origination Date Field  . . . . . . . . . . . 36
+       4.5.2.  Obsolete Originator Fields . . . . . . . . . . . . . . 36
+       4.5.3.  Obsolete Destination Address Fields  . . . . . . . . . 37
+       4.5.4.  Obsolete Identification Fields . . . . . . . . . . . . 37
+       4.5.5.  Obsolete Informational Fields  . . . . . . . . . . . . 37
+
+
+目次
+
+   1.  導入 . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  4
+     1.1.  適用範囲 . . . . . . . . . . . . . . . . . . . . . . . . .  4
+     1.2.  表現規約 . . . . . . . . . . . . . . . . . . . . . . . . .  5
+     1.2.1.  要求事項の表記 . . . . . . . . . . . . . . . . . . . . .  5
+       1.2.2.  文法表記 . . . . . . . . . . . . . . . . . . . . . . .  5
+       1.2.3.  この文書の構造 . . . . . . . . . . . . . . . . . . . .  5
+   2.  メッセージの字句解析 . . . . . . . . . . . . . . . . . . . . .  6
+     2.1.  概要 . . . . . . . . . . . . . . . . . . . . . . . . . . .  6
+       2.1.1.  行の長さの制限 . . . . . . . . . . . . . . . . . . . .  7
+     2.2.  ヘッダーフィールド . . . . . . . . . . . . . . . . . . . .  8
+       2.2.1.  非構造化ヘッダーフィールド本文 . . . . . . . . . . . .  8
+       2.2.2.  構造化ヘッダーフィールド本文 . . . . . . . . . . . . .  8
+       2.2.3.  長いヘッダーフィールド . . . . . . . . . . . . . . . .  8
+     2.3.  本文 . . . . . . . . . . . . . . . . . . . . . . . . . . .  9
+   3.  文法 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 10
+     3.1.  導入 . . . . . . . . . . . . . . . . . . . . . . . . . . . 10
+     3.2.  語彙トークン . . . . . . . . . . . . . . . . . . . . . . . 10
+       3.2.1.  引用文字 . . . . . . . . . . . . . . . . . . . . . . . 10
+       3.2.2.  空白の折り返しとコメント . . . . . . . . . . . . . . . 11
+       3.2.3.  アトム . . . . . . . . . . . . . . . . . . . . . . . . 12
+       3.2.4.  引用文字列 . . . . . . . . . . . . . . . . . . . . . . 13
+       3.2.5.  様々なトークン . . . . . . . . . . . . . . . . . . . . 14
+     3.3.  日付・時間の仕様 . . . . . . . . . . . . . . . . . . . . . 14
+     3.4.  アドレスの仕様 . . . . . . . . . . . . . . . . . . . . . . 16
+       3.4.1.  Addr-Spec仕様  . . . . . . . . . . . . . . . . . . . . 17
+     3.5.  メッセージ全体の文法 . . . . . . . . . . . . . . . . . . . 18
+     3.6.  フィールドの定義 . . . . . . . . . . . . . . . . . . . . . 19
+       3.6.1.  送信日付フィールド . . . . . . . . . . . . . . . . . . 22
+       3.6.2.  送信元フィールド . . . . . . . . . . . . . . . . . . . 22
+       3.6.3.  宛先アドレスフィールド . . . . . . . . . . . . . . . . 23
+       3.6.4.  識別フィールド . . . . . . . . . . . . . . . . . . . . 25
+       3.6.5.  情報フィールド . . . . . . . . . . . . . . . . . . . . 27
+       3.6.6.  再送フィールド . . . . . . . . . . . . . . . . . . . . 28
+       3.6.7.  トレースフィールド . . . . . . . . . . . . . . . . . . 30
+       3.6.8.  オプションフィールド . . . . . . . . . . . . . . . . . 30
+   4.  廃止された文法 . . . . . . . . . . . . . . . . . . . . . . . . 31
+     4.1.  廃止された様々なトークン . . . . . . . . . . . . . . . . . 32
+     4.2.  廃止された空白の折り返し(FWS)  . . . . . . . . . . . . . . 33
+     4.3.  廃止された日付・時間 . . . . . . . . . . . . . . . . . . . 33
+     4.4.  廃止されたアドレス指定 . . . . . . . . . . . . . . . . . . 35
+     4.5.  廃止されたヘッダーフィールド . . . . . . . . . . . . . . . 35
+       4.5.1.  廃止された送信日付フィールド . . . . . . . . . . . . . 36
+       4.5.2.  廃止された送信元フィールド . . . . . . . . . . . . . . 36
+       4.5.3.  廃止された宛先アドレスフィールド . . . . . . . . . . . 37
+       4.5.4.  廃止された識別フィールド . . . . . . . . . . . . . . . 37
+       4.5.5.  廃止された情報フィールド . . . . . . . . . . . . . . . 37
+
+
+
+Resnick                     Standards Track                     [Page 2]
+
+RFC 5322                Internet Message Format             October 2008
+
+
+       4.5.6.  Obsolete Resent Fields . . . . . . . . . . . . . . . . 38
+       4.5.7.  Obsolete Trace Fields  . . . . . . . . . . . . . . . . 38
+       4.5.8.  Obsolete optional fields . . . . . . . . . . . . . . . 38
+   5.  Security Considerations  . . . . . . . . . . . . . . . . . . . 38
+   6.  IANA Considerations  . . . . . . . . . . . . . . . . . . . . . 39
+   Appendix A.     Example Messages . . . . . . . . . . . . . . . . . 43
+   Appendix A.1.   Addressing Examples  . . . . . . . . . . . . . . . 44
+   Appendix A.1.1. A Message from One Person to Another with
+                   Simple Addressing  . . . . . . . . . . . . . . . . 44
+   Appendix A.1.2. Different Types of Mailboxes . . . . . . . . . . . 45
+   Appendix A.1.3. Group Addresses  . . . . . . . . . . . . . . . . . 45
+   Appendix A.2.   Reply Messages . . . . . . . . . . . . . . . . . . 46
+   Appendix A.3.   Resent Messages  . . . . . . . . . . . . . . . . . 47
+   Appendix A.4.   Messages with Trace Fields . . . . . . . . . . . . 48
+   Appendix A.5.   White Space, Comments, and Other Oddities  . . . . 49
+   Appendix A.6.   Obsoleted Forms  . . . . . . . . . . . . . . . . . 50
+   Appendix A.6.1. Obsolete Addressing  . . . . . . . . . . . . . . . 50
+   Appendix A.6.2. Obsolete Dates . . . . . . . . . . . . . . . . . . 50
+   Appendix A.6.3. Obsolete White Space and Comments  . . . . . . . . 51
+   Appendix B.     Differences from Earlier Specifications  . . . . . 52
+   Appendix C.     Acknowledgements . . . . . . . . . . . . . . . . . 53
+   7.  References . . . . . . . . . . . . . . . . . . . . . . . . . . 55
+     7.1.  Normative References . . . . . . . . . . . . . . . . . . . 55
+     7.2.  Informative References . . . . . . . . . . . . . . . . . . 55
+
+
+       4.5.6.  廃止された再送フィールド . . . . . . . . . . . . . . . 38
+       4.5.7.  廃止されたトレースフィールド . . . . . . . . . . . . . 38
+       4.5.8.  廃止されたオプションフィールド . . . . . . . . . . . . 38
+   5.  セキュリティ考察 . . . . . . . . . . . . . . . . . . . . . . . 38
+   6.  IANA考察 . . . . . . . . . . . . . . . . . . . . . . . . . . . 39
+   付録A.     メッセージの例  . . . . . . . . . . . . . . . . . . . . 43
+   付録A.1.   アドレス指定の例  . . . . . . . . . . . . . . . . . . . 44
+   付録A.1.1. 単純なアドレス指定による個人から他の個人へのメッセージ. 44
+   付録A.1.2. 異なる種類のメールボックス  . . . . . . . . . . . . . . 45
+   付録A.1.3. グループアドレス  . . . . . . . . . . . . . . . . . . . 45 
+   付録A.2.   返信メッセージ  . . . . . . . . . . . . . . . . . . . . 46 
+   付録A.3.   再送メッセージ  . . . . . . . . . . . . . . . . . . . . 47
+   付録A.4.   トレースフィールド付きメッセージ  . . . . . . . . . . . 48
+   付録A.5.   空白文字、コメント、その他変なもの  . . . . . . . . . . 49
+   付録A.6.   廃止された形式  . . . . . . . . . . . . . . . . . . . . 50 
+   付録A.6.1. アドレス指定の廃止  . . . . . . . . . . . . . . . . . . 50 
+   付録A.6.2. 日付の廃止  . . . . . . . . . . . . . . . . . . . . . . 50 
+   付録A.6.3. 空白文字とコメントの廃止  . . . . . . . . . . . . . . . 51
+   付録B.     以前の仕様との違い  . . . . . . . . . . . . . . . . . . 52
+   付録C.     謝辞  . . . . . . . . . . . . . . . . . . . . . . . . . 53
+   7.  参考文献 . . . . . . . . . . . . . . . . . . . . . . . . . . . 55
+     7.1.  標準的な参考文献 . . . . . . . . . . . . . . . . . . . . . 55
+     7.2.  有益な参考文献 . . . . . . . . . . . . . . . . . . . . . . 55
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Resnick                     Standards Track                     [Page 3]
+
+RFC 5322                Internet Message Format             October 2008
+
+
+1.  Introduction
+1.  導入
+
+1.1.  Scope
+1.1.  適用範囲
+
+   This document specifies the Internet Message Format (IMF), a syntax
+   for text messages that are sent between computer users, within the
+   framework of "electronic mail" messages.  This specification is an
+   update to [RFC2822], which itself superseded [RFC0822], updating it
+   to reflect current practice and incorporating incremental changes
+   that were specified in other RFCs such as [RFC1123].
+	
+   このドキュメントではインターネットメッセージフォーマット(IMF)、複数
+   のコンピューターユーザー間で送信されるテキストメッセージ"電子メール
+   "の文法の仕様を定める。この仕様は、現在の慣例やRFC1123などの他のRFC 
+   の仕様の増加分を含むことによって、RFC0822に取って代わったRFC2822の
+   更新版である。
+
+   This document specifies a syntax only for text messages.  In
+   particular, it makes no provision for the transmission of images,
+   audio, or other sorts of structured data in electronic mail messages.
+   There are several extensions published, such as the MIME document
+   series ([RFC2045], [RFC2046], [RFC2049]), which describe mechanisms
+   for the transmission of such data through electronic mail, either by
+   extending the syntax provided here or by structuring such messages to
+   conform to this syntax.  Those mechanisms are outside of the scope of
+   this specification.
+
+   このドキュメントではテキストメッセージのためだけの文法の仕様を定め
+   る。具体的には、電子メールでの画像や音楽、その他の構造化データの送
+   信のための仕様は提供されない。MIMEドキュメント群(RFC2045, RFC2046,
+   RFC2049)のように公式の拡張がいくつかあり、これらは、ここで提供して
+   いる文法の拡張か、それらのメッセージをこの文法にあわせるために構造
+   化することによって、電子メールでのそれらのデータ転送の構造を記述し
+   ている。それらの構造はこの仕様の適用範囲外である。
+
+   In the context of electronic mail, messages are viewed as having an
+   envelope and contents.  The envelope contains whatever information is
+   needed to accomplish transmission and delivery.  (See [RFC5321] for a
+   discussion of the envelope.)  The contents comprise the object to be
+   delivered to the recipient.  This specification applies only to the
+   format and some of the semantics of message contents.  It contains no
+   specification of the information in the envelope.
+
+   電子メールでは、メッセージはエンベロープとコンテンツがあるものとみ
+   なされる。エンベロープは送信や配信を実行するために必要なあらゆる情
+   報を含んでいる。(エンベロープの議論にはRFC5321を参照) そのコンテン
+   ツには受信者に配信されるオブジェクトが含まれる。この仕様はメッセー
+   ジコンテンツの書式と一部の意味論にのみ適用し、エンベロープ内の情報
+   の仕様は含まない。
+
+   However, some message systems may use information from the contents
+   to create the envelope.  It is intended that this specification
+   facilitate the acquisition of such information by programs.
+
+   しかし、エンベロープを作成するためにコンテンツから情報を使っている
+   メッセージシステムがあるかもしれない。この仕様は、プログラムがそれ
+   らの情報の取得するのを容易にすることも目的としている。
+
+   This specification is intended as a definition of what message
+   content format is to be passed between systems.  Though some message
+   systems locally store messages in this format (which eliminates the
+   need for translation between formats) and others use formats that
+   differ from the one specified in this specification, local storage is
+   outside of the scope of this specification.
+
+   この仕様の目的は、システム間を渡されるメッセージコンテンツの書式の
+   定義である。いくつかのメッセージシステムがこの書式（書式間の変換に
+   必要なものを除外する）でメッセージをローカルに保存し、他のシステム
+   ではこの仕様とは異なる仕様の書式を使うこともあるので、ローカルスト
+   レージはこの仕様の適用範囲外である。
+
+      Note: This specification is not intended to dictate the internal
+      formats used by sites, the specific message system features that
+      they are expected to support, or any of the characteristics of
+      user interface programs that create or read messages.  In
+      addition, this document does not specify an encoding of the
+      characters for either transport or storage; that is, it does not
+      specify the number of bits used or how those bits are specifically
+      transferred over the wire or stored on disk.
+
+      注釈：この仕様は、サイト内での内部的な書式や、サポートすることが
+      期待される特定のメッセージシステムの機能や、メッセージ生成や閲覧
+      を行うユーザーインターフェースの特徴を強要するものではない。つま
+      り、このドキュメントは転送や保存のための文字コードを定めない。そ
+      れは、使用するビット数やそれらのビットを具体的にケーブル上を転送、
+      もしくは、ディスクに保存する方法を定めるものではないということで
+      ある。
+
+
+Resnick                     Standards Track                     [Page 4]
+
+RFC 5322                Internet Message Format             October 2008
+
+
+1.2.  Notational Conventions
+1.2.  表現規約
+
+1.2.1.  Requirements Notation
+1.2.1.  要求事項の表記
+
+   This document occasionally uses terms that appear in capital letters.
+   When the terms "MUST", "SHOULD", "RECOMMENDED", "MUST NOT", "SHOULD
+   NOT", and "MAY" appear capitalized, they are being used to indicate
+   particular requirements of this specification.  A discussion of the
+   meanings of these terms appears in [RFC2119].
+
+   このドキュメントは時折、重要な公式文書で現れる表現を使う。"MUST",
+   "SHOULD", "RECOMMEND", "MUST NOT", "SHOULD NOT", "MAY"という表現が
+   大文字で現れた場合、この仕様特定の要求を表すために使われている。こ
+   れらの表現の意味の議論はRFC2119にある。
+
+1.2.2.  Syntactic Notation
+1.2.2.  文法表記
+
+   This specification uses the Augmented Backus-Naur Form (ABNF)
+   [RFC5234] notation for the formal definitions of the syntax of
+   messages.  Characters will be specified either by a decimal value
+   (e.g., the value %d65 for uppercase A and %d97 for lowercase A) or by
+   a case-insensitive literal value enclosed in quotation marks (e.g.,
+   "A" for either uppercase or lowercase A).
+
+   この仕様は、メッセージの文法の正規の定義のために拡張バッカス・ナウ
+   ア記法()(Augmented Backus-Naur Form (=ABNF)[RFC5234])を使う。文字は
+   10進の値(例：A -> %d65, a -> %d97)か、引用符で囲まれた大文字小文字
+   を区別しない文字の値(例：大文字小文字のA -> "A")を用いて仕様を定め
+   る。
+
+1.2.3.  Structure of This Document
+1.2.3.  この文章の構造
+
+   This document is divided into several sections.
+
+   このドキュメントは、複数の章に分かれている。
+
+   This section, section 1, is a short introduction to the document.
+
+   この章、第1章は、このドキュメントの短い導入である。
+
+   Section 2 lays out the general description of a message and its
+   constituent parts.  This is an overview to help the reader understand
+   some of the general principles used in the later portions of this
+   document.  Any examples in this section MUST NOT be taken as
+   specification of the formal syntax of any part of a message.
+
+   第2章は、一般的なメッセージの記述とその構成要素について説明する。こ
+   れは読者にこのドキュメントの一部でも使われている一般的な法則を理解
+   するのを手助けするための要約である。この章の例はメッセージの一部の
+   正式な文法の仕様として扱ってはならない(MUST NOT)。
+
+   Section 3 specifies formal ABNF rules for the structure of each part
+   of a message (the syntax) and describes the relationship between
+   those parts and their meaning in the context of a message (the
+   semantics).  That is, it lays out the actual rules for the structure
+   of each part of a message (the syntax) as well as a description of
+   the parts and instructions for their interpretation (the semantics).
+   This includes analysis of the syntax and semantics of subparts of
+   messages that have specific structure.  The syntax included in
+   section 3 represents messages as they MUST be created.  There are
+   also notes in section 3 to indicate if any of the options specified
+   in the syntax SHOULD be used over any of the others.
+
+   第3章は、メッセージ(文法)の各部分の構造の正規のためにABNF規則の仕様
+   を定め、それらの部分とメッセージ(意味論)の文脈の持つ意味との関係を
+   記述する。すなわち、その部分の記述やこれらの解説(意味論) の指示と同
+   じくらい、メッセージ（文法）の各部分の構造のための実際の規則を説明
+   する。これは特定の構造を持ったメッセージの下位の部分の文法や意味論
+   の分析を含んでいる。第3章に含まれるこれらの文法は、作成されなければ
+   ならない(MUST)ものとしてのメッセージを意味する。第3章には 文法中で
+   定められたオプションは他のオプションより使われるべきだ(SHOULD)、と
+   いうことを示すための注釈もある。
+
+   Both sections 2 and 3 describe messages that are legal to generate
+   for purposes of this specification.
+
+   第2, 3章は共に、この仕様の目的のために生成される仕様に従ったメッセー
+   ジについて記述する。
+
+
+
+
+
+Resnick                     Standards Track                     [Page 5]
+
+RFC 5322                Internet Message Format             October 2008
+
+
+   Section 4 of this document specifies an "obsolete" syntax.  There are
+   references in section 3 to these obsolete syntactic elements.  The
+   rules of the obsolete syntax are elements that have appeared in
+   earlier versions of this specification or have previously been widely
+   used in Internet messages.  As such, these elements MUST be
+   interpreted by parsers of messages in order to be conformant to this
+   specification.  However, since items in this syntax have been
+   determined to be non-interoperable or to cause significant problems
+   for recipients of messages, they MUST NOT be generated by creators of
+   conformant messages.
+
+   第4章では"廃止された"文法について定める。第3章にはそれら廃止された
+   文法要素の参照がある。その廃止された文法の規則はこの仕様の前のバー
+   ジョンで登場していた要素か、以前はインターネットメッセージで広く使
+   われていた要素である。そのような場合、それらの要素はこの仕様に合わ
+   せるためにメッセージパーサーによって解釈されなければならない(MUST)。
+   しかしながら、この文法の項目が相互運用不可能である、もしくは、メッ
+   セージの受信者にとって重要な問題の原因となると決定されたときから、
+   これらはメッセージの作成者によって生成されてはならない(MUST NOT)。
+
+   Section 5 details security considerations to take into account when
+   implementing this specification.
+
+   第5章は、この仕様を実装するときにセキュリティに考慮するための詳細で
+   ある。
+
+   Appendix A lists examples of different sorts of messages.  These
+   examples are not exhaustive of the types of messages that appear on
+   the Internet, but give a broad overview of certain syntactic forms.
+
+   付録Aは、異なる種類のメッセージの例である。これらの例は、インターネッ
+   ト上に現れるメッセージの種類を網羅しているわけではない。しかし、構
+   文の種類の概観を幅広く提供している。
+
+   Appendix B lists the differences between this specification and
+   earlier specifications for Internet messages.
+
+   付録Bは、インターネットメッセージのこの仕様と初期の仕様との違いの一
+   覧である。
+
+   Appendix C contains acknowledgements.
+
+   付録Cは謝辞である。
+
+2.  Lexical Analysis of Messages
+2.  メッセージの字句解析
+
+2.1.  General Description
+2.1.  概要
+
+   At the most basic level, a message is a series of characters.  A
+   message that is conformant with this specification is composed of
+   characters with values in the range of 1 through 127 and interpreted
+   as US-ASCII [ANSI.X3-4.1986] characters.  For brevity, this document
+   sometimes refers to this range of characters as simply "US-ASCII
+   characters".
+
+
+   最も基本的なレベルでは、メッセージは文字の連続である。この仕様と整
+   合のとれるメッセージは1～127の範囲の文字コードの文字で構成されて、
+   US-ASCII [ANSI.X3-4.1986]文字として解釈される。略して、このドキュメ
+   ントは時々単純な"US-ASCII文字"としてこの範囲に言及する。
+
+      Note: This document specifies that messages are made up of
+      characters in the US-ASCII range of 1 through 127.  There are
+      other documents, specifically the MIME document series ([RFC2045],
+      [RFC2046], [RFC2047], [RFC2049], [RFC4288], [RFC4289]), that
+      extend this specification to allow for values outside of that
+      range.  Discussion of those mechanisms is not within the scope of
+      this specification.
+
+      注釈：このドキュメントは、メッセージは1～127の範囲のUS-ASCII文字
+      で構成されていることを明記しておく。他のドキュメント、特にMIMEド
+      キュメント群(RFC2045, RFC2046, RFC2047, RFC2049, RFC4288,
+      RFC4289)では、この範囲外の文字コードも扱えるようにこの仕様を拡張
+      している。これらの構造の議論についてはこのドキュメントの適用範囲
+      外である。
+
+   Messages are divided into lines of characters.  A line is a series of
+   characters that is delimited with the two characters carriage-return
+   and line-feed; that is, the carriage return (CR) character (ASCII
+   value 13) followed immediately by the line feed (LF) character (ASCII
+   value 10).  (The carriage return/line feed pair is usually written in
+   this document as "CRLF".)
+
+   メッセージは複数の文字の複数の行に分割される。1行はキャリッジリター
+   ンとラインフィードで区切られた1連の文字の並びである。キャリッジリター
+   ン(CR)文字(ASCII値 13)のすぐ後ろにラインフィード(LF)文字(ASCII値 
+   10)が続く。（このドキュメントではキャリッジリターン／ラインフィード
+   の組み合わせは通常"CRLF"で表す。）
+
+
+
+Resnick                     Standards Track                     [Page 6]
+
+RFC 5322                Internet Message Format             October 2008
+
+
+   A message consists of header fields (collectively called "the header
+   section of the message") followed, optionally, by a body.  The header
+   section is a sequence of lines of characters with special syntax as
+   defined in this specification.  The body is simply a sequence of
+   characters that follows the header section and is separated from the
+   header section by an empty line (i.e., a line with nothing preceding
+   the CRLF).
+
+   メッセージはヘッダーフィールド（まとめて"メッセージのヘッダーセクショ
+   ン"と呼ばれる）と、オプションで本文が続く。ヘッダーセクションは、こ
+   の仕様で定めた専用の文法で書かれた文字の行の連続である。本文は単純
+   にヘッダーセクションに続く文字の連続である。本文は空行（CRLFの前に
+   何もない行）でヘッダーセクションと分離される。
+
+      Note: Common parlance and earlier versions of this specification
+      use the term "header" to either refer to the entire header section
+      or to refer to an individual header field.  To avoid ambiguity,
+      this document does not use the terms "header" or "headers" in
+      isolation, but instead always uses "header field" to refer to the
+      individual field and "header section" to refer to the entire
+      collection.
+
+      注釈：以前のバージョンの仕様では、"ヘッダー(header)"という用語は、
+      全ヘッダーセクションか特定のヘッダーセクションを指す専門用語とし
+      て共通に使用している。曖昧さを除くために、このドキュメントでは" 
+      ヘッダー(header, headers)"は単独では使用しない。代わりに、特定の
+      ヘッダーフィールドを指すものとして"ヘッダーフィールド(header
+      field)"、ヘッダー全体を指すものとして"ヘッダーセクション(header
+      section)"を使用する。
+
+
+2.1.1.  Line Length Limits
+2.1.1.  行の長さの制限
+
+   There are two limits that this specification places on the number of
+   characters in a line.  Each line of characters MUST be no more than
+   998 characters, and SHOULD be no more than 78 characters, excluding
+   the CRLF.
+
+   このドキュメントでは1行の文字数に2つの制限がある。各行の文字は改行
+   コード(CRLF)を除いて、998文字を超えてはならない(MUST)。また、78文字
+   を超えないべきである(SHOULD)。
+
+   The 998 character limit is due to limitations in many implementations
+   that send, receive, or store IMF messages which simply cannot handle
+   more than 998 characters on a line.  Receiving implementations would
+   do well to handle an arbitrarily large number of characters in a line
+   for robustness sake.  However, there are so many implementations that
+   (in compliance with the transport requirements of [RFC5321]) do not
+   accept messages containing more than 1000 characters including the CR
+   and LF per line, it is important for implementations not to create
+   such messages.
+
+   998文字の制限は、IMFメッセージを送信、受信、保存する多くの実装ため
+   の制限で、それらは998文字以上の行は単純には扱えない。受信処理の実装
+   は、構造安定性のために独自に文字数の多い行も上手く扱えるようにした
+   のかもしれない。しかし、CR, LFを含めて1行で1000文字を超えるメッセー
+   ジは受け付けない、という実装もたくさん存在する（RFC5321の転送要求に
+   従っている）。実装にあたってはそのようなメッセージは生成しないこと
+   が重要である。
+
+   The more conservative 78 character recommendation is to accommodate
+   the many implementations of user interfaces that display these
+   messages which may truncate, or disastrously wrap, the display of
+   more than 78 characters per line, in spite of the fact that such
+   implementations are non-conformant to the intent of this
+   specification (and that of [RFC5321] if they actually cause
+   information to be lost).  Again, even though this limitation is put
+   on messages, it is incumbent upon implementations that display
+   messages to handle an arbitrarily large number of characters in a
+   line (certainly at least up to the 998 character limit) for the sake
+   of robustness.
+
+   より保守的な78文字の推奨は、この仕様（と、もし実際に情報を失う原因
+   になったとしてもRFC5321）の意図するところと整合性が取れていない実装
+   であるにもかかわらず、78文字以上の行の表示を切り詰めたり、ラップし
+   たりするメッセージを表示させる多くのユーザーインターフェースの実装
+   同士を調整するためである。この場合も同様に、この制限がメッセージに
+   適用されたとしても、構造安定性のために文字数が多い行（もちろん、少
+   なくとも998文字制限まで）も独自に扱うようにメッセージを表示する実装
+   を行う義務がある。
+
+
+Resnick                     Standards Track                     [Page 7]
+
+RFC 5322                Internet Message Format             October 2008
+
+
+2.2.  Header Fields
+2.2.  ヘッダーフィールド
+
+   Header fields are lines beginning with a field name, followed by a
+   colon (":"), followed by a field body, and terminated by CRLF.  A
+   field name MUST be composed of printable US-ASCII characters (i.e.,
+   characters that have values between 33 and 126, inclusive), except
+   colon.  A field body may be composed of printable US-ASCII characters
+   as well as the space (SP, ASCII value 32) and horizontal tab (HTAB,
+   ASCII value 9) characters (together known as the white space
+   characters, WSP).  A field body MUST NOT include CR and LF except
+   when used in "folding" and "unfolding", as described in section
+   2.2.3.  All field bodies MUST conform to the syntax described in
+   sections 3 and 4 of this specification.
+
+   ヘッダーフィールドはフィールド名で始まり、コロン(:)、フィールド本文、
+   終端文字(CRLF)と続く行である。フィールド名はコロンを除いた表示可能
+   なUS-ASCII文字(文字コードが33～126の文字)で構成されなければならない
+   (MUST)。フィールド本文は表示可能なUS-ASCII文字のほかに、スペース
+   (SP, ASCII値 32)や水平タブ(HTAB, ASCII値 9)の文字(空白文字, WSPとし
+   て知られる)から構成することができる。フィールド本文は、2.2.3章で説
+   明する"折り返し(folding)", "展開(unfolding)"に使用するときを除き、
+   CR, LFを含んではならない(MUST NOT)。全てのフィールド本文はこのドキュ
+   メントの3, 4章で説明する文法に従わなければならない(MUST)。
+
+
+2.2.1.  Unstructured Header Field Bodies
+2.2.1.  非構造化ヘッダーフィールド本文
+
+   Some field bodies in this specification are defined simply as
+   "unstructured" (which is specified in section 3.2.5 as any printable
+   US-ASCII characters plus white space characters) with no further
+   restrictions.  These are referred to as unstructured field bodies.
+   Semantically, unstructured field bodies are simply to be treated as a
+   single line of characters with no further processing (except for
+   "folding" and "unfolding" as described in section 2.2.3).
+
+   このドキュメントのフィールド本文には単純で制約のない"構造化していな
+   いもの(unstructured)"（3.2.5章で表示可能なUS-ASCII文字と空白文字で
+   仕様を定める）として定義されているものもある。それらは非構造化フィー
+   ルド本文として言及されている。意味的に、非構造化フィールド本文は単
+   純にそれ以上処理することのない1行として処理される（2.2.3章で説明す
+   る" 折り返し(folding)", "展開(unfolding)"を除く）。
+
+
+2.2.2.  Structured Header Field Bodies
+2.2.2.  構造化ヘッダーフィールド本文
+
+   Some field bodies in this specification have a syntax that is more
+   restrictive than the unstructured field bodies described above.
+   These are referred to as "structured" field bodies.  Structured field
+   bodies are sequences of specific lexical tokens as described in
+   sections 3 and 4 of this specification.  Many of these tokens are
+   allowed (according to their syntax) to be introduced or end with
+   comments (as described in section 3.2.2) as well as the white space
+   characters, and those white space characters are subject to "folding"
+   and "unfolding" as described in section 2.2.3.  Semantic analysis of
+   structured field bodies is given along with their syntax.
+
+   このドキュメントのフィールド本文には、先ほど説明した非構造化フィー
+   ルド本文より制約のある文法を持ったものがある。それらは"構造化
+   (structured)"フィールド本文として参照する。構造化フィールド本文は、
+   この仕様の3, 4章で説明する特定の語彙トークンの連続である。それらの
+   トークンの多くはコメント（3.2.2章で説明する）のほかに空白文字で始まっ
+   たり終わったりすることを（それらの文法に従って）許している。それら
+   空白文字は2.2.3章で説明するように、"折り返し(folding)", "展開
+   (unfolding)"しなければならない。構造化フィールド本文の意味解析はそ
+   れらの文法に従って与えられる。
+
+
+2.2.3.  Long Header Fields
+2.2.3.  長いヘッダーフィールド
+
+   Each header field is logically a single line of characters comprising
+   the field name, the colon, and the field body.  For convenience
+   however, and to deal with the 998/78 character limitations per line,
+   the field body portion of a header field can be split into a
+   multiple-line representation; this is called "folding".  The general
+   rule is that wherever this specification allows for folding white
+   space (not simply WSP characters), a CRLF may be inserted before any
+   WSP.
+
+   各ヘッダーフィールドは論理的にフィールド名、コロン、フィールド本文
+   からなる単独行である。しかし、便宜的に1行998/78文字の制限に従うため
+   に、ヘッダーフィールドのフィールド本文部分は複数行に分けて表記する
+   ことができる。これを"折り返し(folding)"と呼ぶ。一般的な規則では、こ
+   の仕様が空白の折り返しを許可しているところではどこでも(WSP文字だけ
+   ではない)、CRLFをWSPの前に挿入してよい、となっている。
+
+
+Resnick                     Standards Track                     [Page 8]
+
+RFC 5322                Internet Message Format             October 2008
+
+
+   For example, the header field:
+
+   Subject: This is a test
+
+   can be represented as:
+
+   Subject: This
+    is a test
+
+
+   (例) ヘッダーフィールド:
+
+   Subject: This is a test
+
+   は、
+
+   Subject: This
+    is a test
+ 
+   と表せる。
+
+
+      Note: Though structured field bodies are defined in such a way
+      that folding can take place between many of the lexical tokens
+      (and even within some of the lexical tokens), folding SHOULD be
+      limited to placing the CRLF at higher-level syntactic breaks.  For
+      instance, if a field body is defined as comma-separated values, it
+      is recommended that folding occur after the comma separating the
+      structured items in preference to other places where the field
+      could be folded, even if it is allowed elsewhere.
+
+      注釈：構造化フィールド本文が、折り返しは多くの語彙トークン(やい
+      くつかの語彙トークン内)の間におけると定義されているが、折り返し
+      はCRLFを上位の構文の切れ目に置くことに制限すべきである(SHOULD)。
+      例としては、もしフィールド本文がコンマで区切られて定義されていれ
+      ば、折り返しはたとえそれが他の場所で許されていても、折り返すこと
+      のできるほかの場所に優先して、構造化項目を区切っているコンマの後
+      にあることを推奨する。
+
+   The process of moving from this folded multiple-line representation
+   of a header field to its single line representation is called
+   "unfolding".  Unfolding is accomplished by simply removing any CRLF
+   that is immediately followed by WSP.  Each header field should be
+   treated in its unfolded form for further syntactic and semantic
+   evaluation.  An unfolded header field has no length restriction and
+   therefore may be indeterminately long.
+
+   ヘッダーフィールドの折り返されている複数行表現から単独行表現へ移る
+   処理は"展開(unfolding)"と呼ばれている。展開は単純にWSPがすぐ後に続
+   くCRLFを取り除くことで行われる。展開形式内では各ヘッダーフィールド
+   は追加的な構文上や意味上の評価のためにで処理されるべきである。展開
+   ヘッダーフィールドは長さの制限がないので、不定に長くなるかもしれな
+   い。
+
+2.3.  Body
+2.3.  本文
+
+   The body of a message is simply lines of US-ASCII characters.  The
+   only two limitations on the body are as follows:
+
+  メッセージの本文は単純にUS-ASCII文字の行である。本文には以下の2つの
+   制限があるだけである。
+
+   o  CR and LF MUST only occur together as CRLF; they MUST NOT appear
+      independently in the body.
+
+   o  CRとLFはCRLFとして一緒に現れなければならない(MUST)。本文内で単独
+      で現れてはならない(MUST NOT)
+
+   o  Lines of characters in the body MUST be limited to 998 characters,
+      and SHOULD be limited to 78 characters, excluding the CRLF.
+
+   o  本文の文字列はCRLFを除いて、998文字制限でなければならなく(MUST)、
+      78文字制限であるべきである(SHOULD)
+
+      Note: As was stated earlier, there are other documents,
+      specifically the MIME documents ([RFC2045], [RFC2046], [RFC2049],
+      [RFC4288], [RFC4289]), that extend (and limit) this specification
+      to allow for different sorts of message bodies.  Again, these
+      mechanisms are beyond the scope of this document.
+
+      注釈：初めの頃に言及したとおり、MIMEドキュメントに特化した他のド
+      キュメントも存在する(RFC2045, RFC2046, RFC2049, RFC4288,
+      RFC4289)。それらは、違ったメッセージ本文を許可するために、この仕
+      様を拡張（あるいは制限）する。この場合もやはり、これらの仕組みは
+      このドキュメントの適用範囲外である。
+
+
+
+
+
+
+
+Resnick                     Standards Track                     [Page 9]
+
+RFC 5322                Internet Message Format             October 2008
+
+
+3.  Syntax
+3.  文法
+
+3.1.  Introduction
+3.1.  導入
+
+   The syntax as given in this section defines the legal syntax of
+   Internet messages.  Messages that are conformant to this
+   specification MUST conform to the syntax in this section.  If there
+   are options in this section where one option SHOULD be generated,
+   that is indicated either in the prose or in a comment next to the
+   syntax.
+
+   この章で示す文法ではインターネットメッセージの文法を定義する。この
+   仕様に整合するメッセージはこの章の文法に従わなければならない(MUST)。
+   もしこの章でオプションを生成すべき(SHOULD)で、その様なオプションが
+   あるのならば、事実伝達の文か文法の隣のコメントで説明する。
+
+
+   For the defined expressions, a short description of the syntax and
+   use is given, followed by the syntax in ABNF, followed by a semantic
+   analysis.  The following primitive tokens that are used but otherwise
+   unspecified are taken from the "Core Rules" of [RFC5234], Appendix
+   B.1: CR, LF, CRLF, HTAB, SP, WSP, DQUOTE, DIGIT, ALPHA, and VCHAR.
+
+   表現の定義のために、ABNFの文法、意味解析に続いてその文法と使い方の
+   短い説明が与えられる。以下の使われているが仕様が定義されていない基
+   本的なトークンはRFC5234, 付録B.1: CR, LF, CRLF, HTAB, SP, WSP,
+   DQUOTE, DIGIT, ALPHA, VCHARの"コア規則(Core Rules)"から解釈される。
+
+   In some of the definitions, there will be non-terminals whose names
+   start with "obs-".  These "obs-" elements refer to tokens defined in
+   the obsolete syntax in section 4.  In all cases, these productions
+   are to be ignored for the purposes of generating legal Internet
+   messages and MUST NOT be used as part of such a message.  However,
+   when interpreting messages, these tokens MUST be honored as part of
+   the legal syntax.  In this sense, section 3 defines a grammar for the
+   generation of messages, with "obs-" elements that are to be ignored,
+   while section 4 adds grammar for the interpretation of messages.
+
+   一部の定義には、"obs-"で始まる非終端記号がある。それら"obs-"要素は4 
+   章で定義する廃止された文法を参照のこと。その全ての場合において、そ
+   れらの生成物は、仕様に従ったインターネットメッセージを作るためと、
+   そのようなメッセージを使わない(MUST NOT)ようにするために無視される。
+   しかし、メッセージを解釈する際に、それらのトークンは仕様に従った文
+   法の一部として支持されなければならない(MUST)。この意味では、第3章は
+   無視される"obs-"要素を持ったメッセージ生成のための文法を定義し、4章
+   はメッセージの解釈のための文法を追加する。
+
+
+3.2.  Lexical Tokens
+3.2.  語彙トークン
+
+   The following rules are used to define an underlying lexical
+   analyzer, which feeds tokens to the higher-level parsers.  This
+   section defines the tokens used in structured header field bodies.
+
+   以下の規則は上位パーサーにトークンを入力する基本的な語彙解析器を定
+   義するために使われる。このセクションでは構造化ヘッダーフィールド本
+   文で使われるトークンを定義する。
+
+      Note: Readers of this specification need to pay special attention
+      to how these lexical tokens are used in both the lower-level and
+      higher-level syntax later in the document.  Particularly, the
+      white space tokens and the comment tokens defined in section 3.2.2
+      get used in the lower-level tokens defined here, and those lower-
+      level tokens are in turn used as parts of the higher-level tokens
+      defined later.  Therefore, white space and comments may be allowed
+      in the higher-level tokens even though they may not explicitly
+      appear in a particular definition.
+
+      注釈：この仕様書の読者は後にこのドキュメントで下位上位両方の文法
+      で、語彙トークンの使われ方に特別な注意を払う必要がある。特に、
+      3.2.2章で定義した空白文字トークンとコメントトークンはこの章で定
+      義する下位トークンで使われ、それら下位トークンは順々に上位トーク
+      ンの一部として使われる。ゆえに、たとえ個々の定義に明確に登場して
+      いなくても、空白文字とコメントは上位トークンで許される。
+
+
+3.2.1.  Quoted characters
+3.2.1.  引用文字
+
+   Some characters are reserved for special interpretation, such as
+   delimiting lexical tokens.  To permit use of these characters as
+   uninterpreted data, a quoting mechanism is provided.
+
+   いくつかの文字は特別な解釈のために予約されている。例えば、語彙トー
+   クンの区切りなどである。解釈されないデータとしてそれらの文字を使え
+   るようにするために、引用機構が与えられる。
+
+
+Resnick                     Standards Track                    [Page 10]
+
+RFC 5322                Internet Message Format             October 2008
+
+
+   quoted-pair     =   ("\" (VCHAR / WSP)) / obs-qp
+
+   Where any quoted-pair appears, it is to be interpreted as the
+   character alone.  That is to say, the "\" character that appears as
+   part of a quoted-pair is semantically "invisible".
+
+   quoted-pairが現れるところは、単独文字として解釈される。つまり、
+   quoted-pairとして現れる"\"文字は意味的に"見えない"。
+
+      Note: The "\" character may appear in a message where it is not
+      part of a quoted-pair.  A "\" character that does not appear in a
+      quoted-pair is not semantically invisible.  The only places in
+      this specification where quoted-pair currently appears are
+      ccontent, qcontent, and in obs-dtext in section 4.
+
+      注釈："\"はメッセージ内でquoted-pairの一部でない所に現れるかもし
+      れない。quoted-pairに現れない"\"文字は意味的にはっきりしている。
+      現在のところ、この仕様書でquoted-pairが現れているただ一つの場所は、
+      4章のccontent、qcontent、obs-dtextである。
+
+
+
+3.2.2.  Folding White Space and Comments
+3.2.2.  空白の折り返しとコメント
+
+   White space characters, including white space used in folding
+   (described in section 2.2.3), may appear between many elements in
+   header field bodies.  Also, strings of characters that are treated as
+   comments may be included in structured field bodies as characters
+   enclosed in parentheses.  The following defines the folding white
+   space (FWS) and comment constructs.
+
+   折り返しで使われる空白文字(2.2.3章)を含めた空白文字は、ヘッダーフィー
+   ルド本文の多くの要素間に現れる。また、コメントとして扱われる文字列
+   は括弧で囲み、構造化フィールド本文に含まれる。以下は空白の折り返し
+   (FWS)とコメントの構築について定義する。
+
+   Strings of characters enclosed in parentheses are considered comments
+   so long as they do not appear within a "quoted-string", as defined in
+   section 3.2.4.  Comments may nest.
+
+   括弧で囲まれた文字列は、3.2.4章で定義するように、"quoted-string"内
+   に現れない限り、コメントを考慮されている。コメントはネスト可能であ
+   る。
+
+   There are several places in this specification where comments and FWS
+   may be freely inserted.  To accommodate that syntax, an additional
+   token for "CFWS" is defined for places where comments and/or FWS can
+   occur.  However, where CFWS occurs in this specification, it MUST NOT
+   be inserted in such a way that any line of a folded header field is
+   made up entirely of WSP characters and nothing else.
+
+   この仕様ではコメントやFWSを挿入できる場所が何箇所かある。その文法に
+   適応するためには、コメントもしくはFWSが現れる場所用に"CFWS"というトー
+   クンを追加で定義する。しかし、この仕様でCFWSが現れる場所には、折り
+   返されたヘッダーフィールドが全てWSPのみで構成されるように挿入しては
+   ならない(MUST NOT)。
+
+
+   FWS             =   ([*WSP CRLF] 1*WSP) /  obs-FWS
+                                          ; Folding white space
+                                          ; 空白の折り返し
+
+   ctext           =   %d33-39 /          ; Printable US-ASCII
+                       %d42-91 /          ;  characters not including
+                       %d93-126 /         ;  "(", ")", or "\"
+                       obs-ctext
+                                          ; "(", ")"や"\"は含まない
+                                          ; 表示可能なUS-ASCII文字
+
+   ccontent        =   ctext / quoted-pair / comment
+
+   comment         =   "(" *([FWS] ccontent) [FWS] ")"
+
+   CFWS            =   (1*([FWS] comment) [FWS]) / FWS
+
+
+
+
+Resnick                     Standards Track                    [Page 11]
+
+RFC 5322                Internet Message Format             October 2008
+
+
+   Throughout this specification, where FWS (the folding white space
+   token) appears, it indicates a place where folding, as discussed in
+   section 2.2.3, may take place.  Wherever folding appears in a message
+   (that is, a header field body containing a CRLF followed by any WSP),
+   unfolding (removal of the CRLF) is performed before any further
+   semantic analysis is performed on that header field according to this
+   specification.  That is to say, any CRLF that appears in FWS is
+   semantically "invisible".
+
+   この仕様の最初から最後まで、FWS(空白の折り返し)が現れる場所は、
+   2.2.3章で議論した折り返しのある場所を表している。メッセージ（WSPに
+   続くCRLFを含むヘッダーフィールド本文）に折り返しが現れる場所はどこ
+   でも、ヘッダーフィールドに対してこの仕様に従ってさらなる意味解析が
+   行われる前に展開（CRLFの除去）が行われる。つまり、FWSに現れるCRLFは
+   意味的に"見えない"。
+
+   A comment is normally used in a structured field body to provide some
+   human-readable informational text.  Since a comment is allowed to
+   contain FWS, folding is permitted within the comment.  Also note that
+   since quoted-pair is allowed in a comment, the parentheses and
+   backslash characters may appear in a comment, so long as they appear
+   as a quoted-pair.  Semantically, the enclosing parentheses are not
+   part of the comment; the comment is what is contained between the two
+   parentheses.  As stated earlier, the "\" in any quoted-pair and the
+   CRLF in any FWS that appears within the comment are semantically
+   "invisible" and therefore not part of the comment either.
+
+   コメントは通常、人間が読める情報テキストを提供するために構造化フィー
+   ルド本文に使われる。コメントがFWSを含むのを許すので、折り返しがコメ
+   ント内にあることも許される。なお、quoted-pairはコメント内にあっても
+   よい。括弧やバックスラッシュはquoted-pairとして現れる限り、コメント
+   に現れてもよい。意味的に、囲っている括弧はコメントの一部ではない。
+   コメントは2つの括弧の間に含まれる。先に述べたように、quoted-pairの
+   "\"やコメント内に現れるFWSのCRLFは意味的に" 見えない"ものなので、ど
+   ちらもコメントの一部ではない。
+
+   Runs of FWS, comment, or CFWS that occur between lexical tokens in a
+   structured header field are semantically interpreted as a single
+   space character.
+
+   構造化ヘッダーフィールドの語彙トークンの間に現れるFWS、comment、
+   CFWSの連続は意味的に単独の空白文字として解釈される。
+
+3.2.3.  Atom
+3.2.3.  アトム
+
+   Several productions in structured header field bodies are simply
+   strings of certain basic characters.  Such productions are called
+   atoms.
+
+   構造化ヘッダーフィールド本文内のいくつかの生成物は、単純に特定の基
+   本的な文字の文字列である。そのような生成物はアトムと呼ばれる。
+
+   Some of the structured header field bodies also allow the period
+   character (".", ASCII value 46) within runs of atext.  An additional
+   "dot-atom" token is defined for those purposes.
+
+   いくつかの構造化ヘッダーフィールド本文もまた、atext内の終端文字
+   (".", ASCII値46)を許している。追加の"dot-atom"トークンはこれらの目
+   的のために定義される。
+
+      Note: The "specials" token does not appear anywhere else in this
+      specification.  It is simply the visible (i.e., non-control, non-
+      white space) characters that do not appear in atext.  It is
+      provided only because it is useful for implementers who use tools
+      that lexically analyze messages.  Each of the characters in
+      specials can be used to indicate a tokenization point in lexical
+      analysis.
+
+      注釈："特殊文字"トークンはこの仕様書の他のところでは現れない。そ
+      れは単にatext内には現れない目に見える文字(すなわち、コントロール
+      や空白文字ではない)なのである。それは、メッセージ語彙解析ツール
+      を使う開発者にとって便利であるためだけに提供される。特殊文字の各
+      文字は、語彙解析での文字列分割位置を表すために使うことができる。
+
+
+
+
+
+
+
+
+Resnick                     Standards Track                    [Page 12]
+
+RFC 5322                Internet Message Format             October 2008
+
+
+   atext           =   ALPHA / DIGIT /    ; Printable US-ASCII
+                       "!" / "#" /        ;  characters not including
+                       "$" / "%" /        ;  specials.  Used for atoms.
+                       "&" / "'" /
+                       "*" / "+" /        ; 特殊文字を含まない表示可能な
+                       "-" / "/" /        ;   US-ASCII文字。atomに使
+                       "=" / "?" /        ;   われる。
+                       "^" / "_" /
+                       "`" / "{" /
+                       "|" / "}" /
+                       "~"
+
+   atom            =   [CFWS] 1*atext [CFWS]
+
+   dot-atom-text   =   1*atext *("." 1*atext)
+
+   dot-atom        =   [CFWS] dot-atom-text [CFWS]
+
+   specials        =   "(" / ")" /        ; Special characters that do
+                       "<" / ">" /        ;  not appear in atext
+                       "[" / "]" /
+                       ":" / ";" /        ; atextには現れない特殊文字
+                       "@" / "\" /
+                       "," / "." /
+                       DQUOTE
+
+   Both atom and dot-atom are interpreted as a single unit, comprising
+   the string of characters that make it up.  Semantically, the optional
+   comments and FWS surrounding the rest of the characters are not part
+   of the atom; the atom is only the run of atext characters in an atom,
+   or the atext and "." characters in a dot-atom.
+
+   atomとdot-atomはどちらも単体のものとして解釈され、文字列を含んでい
+   る。意味的に、付加コメントや他の文字を囲っているFWSはアトムの一部で
+   はない。アトムはatomではただのatext文字の連なりで、dot-atomでは
+   atextや"."文字の連なりである。
+
+3.2.4.  Quoted Strings
+3.2.4.  引用文字列
+
+   Strings of characters that include characters other than those
+   allowed in atoms can be represented in a quoted string format, where
+   the characters are surrounded by quote (DQUOTE, ASCII value 34)
+   characters.
+
+   それらatomで許可された文字以外を含む文字列は引用文字（DQUOTE, ASCII 
+   値 34）で囲まれた引用文字列形式で表される。
+
+
+
+
+
+
+
+
+
+
+
+Resnick                     Standards Track                    [Page 13]
+
+RFC 5322                Internet Message Format             October 2008
+
+
+   qtext           =   %d33 /             ; Printable US-ASCII
+                       %d35-91 /          ;  characters not including
+                       %d93-126 /         ;  "\" or the quote character
+                       obs-qtext
+                                          ; "\"や引用文字を含まない
+                                          ;   表示可能US-ASCII文字
+
+   qcontent        =   qtext / quoted-pair
+
+   quoted-string   =   [CFWS]
+                       DQUOTE *([FWS] qcontent) [FWS] DQUOTE
+                       [CFWS]
+
+   A quoted-string is treated as a unit.  That is, quoted-string is
+   identical to atom, semantically.  Since a quoted-string is allowed to
+   contain FWS, folding is permitted.  Also note that since quoted-pair
+   is allowed in a quoted-string, the quote and backslash characters may
+   appear in a quoted-string so long as they appear as a quoted-pair.
+
+   quoted-stringは単体として処理される。すなわち、quoted-stringは意味
+   的にはatomと同じである。quoted-stringがFWSを含むことを許可している
+   ので、折り返すことも許されている。quoted-stringでquoted-pairが許可
+   されているので、注釈にもまた、引用符やバックスラッシュ文字は
+   quoted-pairとして現れる限り、quoted-stringに現れてもよい。
+
+   Semantically, neither the optional CFWS outside of the quote
+   characters nor the quote characters themselves are part of the
+   quoted-string; the quoted-string is what is contained between the two
+   quote characters.  As stated earlier, the "\" in any quoted-pair and
+   the CRLF in any FWS/CFWS that appears within the quoted-string are
+   semantically "invisible" and therefore not part of the quoted-string
+   either.
+
+   意味的に、引用文字の外側の付加CFWSや引用文字自身はどちらも
+   quoted-stringの一部ではない。quoted-stringは2つの引用文字の間に含ま
+   れるものである。先に述べたように、quoted-string内に現れるquotd-pair
+   の"\"やFWS/CFWSのCRLFは意味的に"目に見えない"ものであり、それがゆえ
+   に、quoted-stringの一部ではない。
+
+
+3.2.5.  Miscellaneous Tokens
+3.2.5.  様々なトークン
+
+   Three additional tokens are defined: word and phrase for combinations
+   of atoms and/or quoted-strings, and unstructured for use in
+   unstructured header fields and in some places within structured
+   header fields.
+
+   wordとpharseは、atomやquoted-stringの組み合わせとして、unstructured 
+   は非構造化ヘッダーフィールドや構造化ヘッダーフィールドのいくつかの
+   場所で使用するために、3つの追加トークンを定義する。
+
+   word            =   atom / quoted-string
+
+   phrase          =   1*word / obs-phrase
+
+   unstructured    =   (*([FWS] VCHAR) *WSP) / obs-unstruct
+
+3.3.  Date and Time Specification
+3.3.  日付・時間の仕様
+
+   Date and time values occur in several header fields.  This section
+   specifies the syntax for a full date and time specification.  Though
+   folding white space is permitted throughout the date-time
+   specification, it is RECOMMENDED that a single space be used in each
+   place that FWS appears (whether it is required or optional); some
+   older implementations will not interpret longer sequences of folding
+   white space correctly.
+
+   日付と時間の値は様々なヘッダーフィールドに現れる。この章では完全な
+   日付と時間の文法の仕様を定める。空白の折り返しは日付・時間の仕様の
+   至る所で許されてるとはいえ、FWSが現れるところでは(それが必須・任意
+   にかかわらず)シングルスペースの仕様を推奨する(RECOMMENDED)。古い実
+   装にはより長い空白の折り返しを正しく解釈しないものもある。
+
+
+Resnick                     Standards Track                    [Page 14]
+
+RFC 5322                Internet Message Format             October 2008
+
+
+   date-time       =   [ day-of-week "," ] date time [CFWS]
+
+   day-of-week     =   ([FWS] day-name) / obs-day-of-week
+
+   day-name        =   "Mon" / "Tue" / "Wed" / "Thu" /
+                       "Fri" / "Sat" / "Sun"
+
+   date            =   day month year
+
+   day             =   ([FWS] 1*2DIGIT FWS) / obs-day
+
+   month           =   "Jan" / "Feb" / "Mar" / "Apr" /
+                       "May" / "Jun" / "Jul" / "Aug" /
+                       "Sep" / "Oct" / "Nov" / "Dec"
+
+   year            =   (FWS 4*DIGIT FWS) / obs-year
+
+   time            =   time-of-day zone
+
+   time-of-day     =   hour ":" minute [ ":" second ]
+
+   hour            =   2DIGIT / obs-hour
+
+   minute          =   2DIGIT / obs-minute
+
+   second          =   2DIGIT / obs-second
+
+   zone            =   (FWS ( "+" / "-" ) 4DIGIT) / obs-zone
+
+   The day is the numeric day of the month.  The year is any numeric
+   year 1900 or later.
+
+   dayは月の日の数値である。yearは1900以降の年の数値である。
+
+   The time-of-day specifies the number of hours, minutes, and
+   optionally seconds since midnight of the date indicated.
+
+   time-of-dayはその日の夜0時からの時、分、そして、オプションで秒の表
+   示を定める。
+
+   The date and time-of-day SHOULD express local time.
+
+   dateとtime-of-dayはローカル時間を表すべきだ(SHOULD)。
+
+   The zone specifies the offset from Coordinated Universal Time (UTC,
+   formerly referred to as "Greenwich Mean Time") that the date and
+   time-of-day represent.  The "+" or "-" indicates whether the time-of-
+   day is ahead of (i.e., east of) or behind (i.e., west of) Universal
+   Time.  The first two digits indicate the number of hours difference
+   from Universal Time, and the last two digits indicate the number of
+   additional minutes difference from Universal Time.  (Hence, +hhmm
+   means +(hh * 60 + mm) minutes, and -hhmm means -(hh * 60 + mm)
+   minutes).  The form "+0000" SHOULD be used to indicate a time zone at
+   Universal Time.  Though "-0000" also indicates Universal Time, it is
+
+
+
+Resnick                     Standards Track                    [Page 15]
+
+RFC 5322                Internet Message Format             October 2008
+
+
+   used to indicate that the time was generated on a system that may be
+   in a local time zone other than Universal Time and that the date-time
+   contains no information about the local time zone.
+
+   zoneはdateやtime-of-dayが示す協定世界時(UTC, 以前は"グリニッジ標準
+   時"を参照していた)からのオフセットを指定する。"+"や"-"は、
+   time-of-dayはUTCより早い(つまり、東側)もしくは遅い(つまり西側)を示
+   す。始めの2数字はUTCからの時間のずれ、後ろの2数字は分のずれを示す。
+   （従って、+hhmm は +(hh * 60 + mm)分、-hhmm は -(hh * 60 + mm)分を
+   意味する）。"+0000"の形式はUTCのタイムゾーンを示すのに使われるべき
+   である(SHOULD)。"-0000"もまたUTCを示していても、それは、timeはUTC以
+   外のローカルタイムゾーン上にあるであろうシステム上で生成され、
+   date-time はローカルタイムゾーンの情報を何も含まない、ということを
+   示すのに使われる。
+
+   A date-time specification MUST be semantically valid.  That is, the
+   day-of-week (if included) MUST be the day implied by the date, the
+   numeric day-of-month MUST be between 1 and the number of days allowed
+   for the specified month (in the specified year), the time-of-day MUST
+   be in the range 00:00:00 through 23:59:60 (the number of seconds
+   allowing for a leap second; see [RFC1305]), and the last two digits
+   of the zone MUST be within the range 00 through 59.
+
+   date-timeの仕様は意味的に通用しなければならない(MUST)。すなわち、
+   day-of-week（もし含まれていれば）はdateの意味を含むdayでなければな
+   らず(MUST)、day-of-monthは1から（その年の）その月の日数の間の数字で
+   なければならず(MUST)、time-of-dayは00:00:00～23:59:60（秒はうるう秒
+   は可[RFC1305]）の範囲でなければならず(MUST)、zoneの最後の2数字は00～
+   59の範囲でなければならない。
+
+3.4.  Address Specification
+3.4.  アドレスの仕様
+
+   Addresses occur in several message header fields to indicate senders
+   and recipients of messages.  An address may either be an individual
+   mailbox, or a group of mailboxes.
+
+   アドレスは送り主やメッセージの宛先を示すためにいくつものメッセージ
+   ヘッダーフィールドに現れる。アドレスは個人のメールボックスかメール
+   ボックスのグループである。
+
+   address         =   mailbox / group
+
+   mailbox         =   name-addr / addr-spec
+
+   name-addr       =   [display-name] angle-addr
+
+   angle-addr      =   [CFWS] "<" addr-spec ">" [CFWS] /
+                       obs-angle-addr
+
+   group           =   display-name ":" [group-list] ";" [CFWS]
+
+   display-name    =   phrase
+
+   mailbox-list    =   (mailbox *("," mailbox)) / obs-mbox-list
+
+   address-list    =   (address *("," address)) / obs-addr-list
+
+   group-list      =   mailbox-list / CFWS / obs-group-list
+
+   A mailbox receives mail.  It is a conceptual entity that does not
+   necessarily pertain to file storage.  For example, some sites may
+   choose to print mail on a printer and deliver the output to the
+   addressee's desk.
+
+   mailboxはメールを受ける。それは概念的なもので、必ずしもファイルスト
+   レージが関連するというわけではない。例えば、いくつかのサイトではメー
+   ルをプリンターで印刷すること選択し、出力を受信者のデスクに送信する
+   だろう。
+
+   Normally, a mailbox is composed of two parts: (1) an optional display
+   name that indicates the name of the recipient (which can be a person
+   or a system) that could be displayed to the user of a mail
+   application, and (2) an addr-spec address enclosed in angle brackets
+
+
+
+
+Resnick                     Standards Track                    [Page 16]
+
+RFC 5322                Internet Message Format             October 2008
+
+
+   ("<" and ">").  There is an alternate simple form of a mailbox where
+   the addr-spec address appears alone, without the recipient's name or
+   the angle brackets.  The Internet addr-spec address is described in
+   section 3.4.1.
+
+   通常、mailboxは2つの部品で構成される。(1)任意の受信者の名前を表す表
+   示名（人でもシステムでも可）。これは、メールアプリケーションのユー
+   ザーに表示される。(2)山括弧（"<"と">"）で囲まれたaddr-specアドレス。
+   受信者の名前と山括弧がなく、addr-specアドレスが単独で現れるmailbox 
+   の代替の単純な書式がある。インターネットaddr-apecアドレスは3.4.1章
+   で説明する。
+
+      Note: Some legacy implementations used the simple form where the
+      addr-spec appears without the angle brackets, but included the
+      name of the recipient in parentheses as a comment following the
+      addr-spec.  Since the meaning of the information in a comment is
+      unspecified, implementations SHOULD use the full name-addr form of
+      the mailbox, instead of the legacy form, to specify the display
+      name associated with a mailbox.  Also, because some legacy
+      implementations interpret the comment, comments generally SHOULD
+      NOT be used in address fields to avoid confusing such
+      implementations.
+
+      注釈：従来の実装にはaddr-specが山括弧なしで現れる単純な書式を使っ
+      ていたが、addr-specに続いてコメントとして丸括弧内に受信者の名前
+      を含んでいたものもあった。コメント内の情報の仕様が定められていな
+      いときから、mailboxに関連した表示名の仕様を定めるために、実装は
+      従来の形式の代わりにmailboxの完全なname-addr形式を使うべきである
+      (SHOULD)。また、従来の実装にもコメントを解釈するものはあるので、
+      コメントは一般的にはそのような実装が混乱するのを避けるために、ア
+      ドレスフィールドには使うべきではない(SHOULD NOT)。
+
+   When it is desirable to treat several mailboxes as a single unit
+   (i.e., in a distribution list), the group construct can be used.  The
+   group construct allows the sender to indicate a named group of
+   recipients.  This is done by giving a display name for the group,
+   followed by a colon, followed by a comma-separated list of any number
+   of mailboxes (including zero and one), and ending with a semicolon.
+   Because the list of mailboxes can be empty, using the group construct
+   is also a simple way to communicate to recipients that the message
+   was sent to one or more named sets of recipients, without actually
+   providing the individual mailbox address for any of those recipients.
+
+   様々なメールボックスを単体の部品として取り扱う（すなわち、配送リス
+   ト内）のが好ましいとき、グループ構成概念が使われる。グループ構成概
+   念では送り主が名前がついた宛先のグループを示すことができる。これは、
+   グループに表示名に続き、コロン、コンマで区切られたメールボックスの
+   リスト（0個や1個も含む）と続いて、最後にセミコロンが与えられる。メー
+   ルボックスのリストは空も可能なので、グループ構成概念を使用すること
+   もまた、実質的には個々のメールボックスのアドレスを複数の宛先に与え
+   ることなく、メッセージは1つかそれ以上の名前のついた宛先のセットに送
+   られた、と宛先に伝えるシンプルな方法である。
+
+3.4.1.  Addr-Spec Specification
+3.4.1.  Addr-Spec仕様
+
+   An addr-spec is a specific Internet identifier that contains a
+   locally interpreted string followed by the at-sign character ("@",
+   ASCII value 64) followed by an Internet domain.  The locally
+   interpreted string is either a quoted-string or a dot-atom.  If the
+   string can be represented as a dot-atom (that is, it contains no
+   characters other than atext characters or "." surrounded by atext
+   characters), then the dot-atom form SHOULD be used and the quoted-
+   string form SHOULD NOT be used.  Comments and folding white space
+   SHOULD NOT be used around the "@" in the addr-spec.
+
+   addr-specはインターネット識別子の仕様で、ローカルで解釈される文字列
+   に続き、アットマーク(@, ASCII値 64)、インターネットドメインが続く。
+   ローカルで解釈される文字列はquoted-stringかdot-atomのどちらかである。
+   もし、その文字列がdot-atom（つまり、atext文字やatext文字で囲まれた
+   "."以外を含まない）として表現することができるのならば、dot-atom形式
+   を使うべき(SHOULD)で、quoted-string形式は使うべきではない(SHOULD
+   NOT)。コメントや空白の折り返しはaddr-specの"@"の周りに使うべきでは
+   ない(SHOULD NOT)。
+
+      Note: A liberal syntax for the domain portion of addr-spec is
+      given here.  However, the domain portion contains addressing
+      information specified by and used in other protocols (e.g.,
+      [RFC1034], [RFC1035], [RFC1123], [RFC5321]).  It is therefore
+      incumbent upon implementations to conform to the syntax of
+      addresses for the context in which they are used.
+
+      注釈：addr-specのドメイン(domain)部分の豊富な文法はここで与えら
+      れる。しかし、domain部分にはアドレス情報を含み、これは他のプロト
+      コルでも使われ、仕様が定義されている（例えば、RFC1034, RFC1035,
+      RFC1123, RFC5321）。よって、それらが使っている文脈のアドレスの文
+      法と一致させるように実装する義務がある。
+
+
+
+Resnick                     Standards Track                    [Page 17]
+
+RFC 5322                Internet Message Format             October 2008
+
+
+   addr-spec       =   local-part "@" domain
+
+   local-part      =   dot-atom / quoted-string / obs-local-part
+
+   domain          =   dot-atom / domain-literal / obs-domain
+
+   domain-literal  =   [CFWS] "[" *([FWS] dtext) [FWS] "]" [CFWS]
+
+   dtext           =   %d33-90 /          ; Printable US-ASCII
+                       %d94-126 /         ;  characters not including
+                       obs-dtext          ;  "[", "]", or "\"
+                                          ; "[", "]"や"\"を含まない
+                                          ;   表示可能なUS-ASCII文字
+
+   The domain portion identifies the point to which the mail is
+   delivered.  In the dot-atom form, this is interpreted as an Internet
+   domain name (either a host name or a mail exchanger name) as
+   described in [RFC1034], [RFC1035], and [RFC1123].  In the domain-
+   literal form, the domain is interpreted as the literal Internet
+   address of the particular host.  In both cases, how addressing is
+   used and how messages are transported to a particular host is covered
+   in separate documents, such as [RFC5321].  These mechanisms are
+   outside of the scope of this document.
+
+   domain部分はメールの配信先を特定する。dot-atom形式では、これは
+   RFC1034, RFC1035, RFC1123で記述されているようなインターネットドメイ
+   ン名（ホスト名かメール交換機名）として解釈される。domain-literal形
+   式では、domainは文字の個々のホストのインターネットアドレスとして解
+   釈される。このどちらの場合でも、アドレス指定を使うこと、メッセージ
+   を特定のホストに転送することは、別々のドキュメントで取り扱う（例え
+   ば、RFC5321）。これらの仕組みについてはこのドキュメントの適用範囲外
+   である。
+
+   The local-part portion is a domain-dependent string.  In addresses,
+   it is simply interpreted on the particular host as a name of a
+   particular mailbox.
+
+   local-part部分はドメイン依存文字列である。アドレスでは、特定のホス
+   ト上で単純に特定のメールボックスの名前として解釈される。
+
+
+3.5.  Overall Message Syntax
+3.5.  メッセージ全体の文法
+
+   A message consists of header fields, optionally followed by a message
+   body.  Lines in a message MUST be a maximum of 998 characters
+   excluding the CRLF, but it is RECOMMENDED that lines be limited to 78
+   characters excluding the CRLF.  (See section 2.1.1 for explanation.)
+   In a message body, though all of the characters listed in the text
+   rule MAY be used, the use of US-ASCII control characters (values 1
+   through 8, 11, 12, and 14 through 31) is discouraged since their
+   interpretation by receivers for display is not guaranteed.
+
+   メッセージは、ヘッダーフィールドと、オプションでメッセージ本文、と
+   続いて構成される。メッセージの行はCRLFを除いて最長が998文字でなけれ
+   ばならない(MUST)が、行はCRLFを除いて78文字に制限することを推奨する
+   (RECOMMENDED)。（説明は2.1.1章を参照。）メッセージ本文では、たとえ
+   textの規則にある全ての文字が使えたとしても(MAY)、受信者による表示の
+   ための解釈が保障されないことから、US-ASCIIコントロール文字（ASCII値 
+   1～8, 11, 12, 14～31）の使用は避けた方がよい。
+
+
+
+   message         =   (fields / obs-fields)
+                       [CRLF body]
+
+   body            =   (*(*998text CRLF) *998text) / obs-body
+
+   text            =   %d1-9 /            ; Characters excluding CR
+                       %d11 /             ;  and LF
+                       %d12 /
+                       %d14-127           ; CRとLFを除く文字
+
+
+
+Resnick                     Standards Track                    [Page 18]
+
+RFC 5322                Internet Message Format             October 2008
+
+
+   The header fields carry most of the semantic information and are
+   defined in section 3.6.  The body is simply a series of lines of text
+   that are uninterpreted for the purposes of this specification.
+
+   ヘッダーフィールドは意味的情報の大部分を伝えるもので、3.6章で定義さ
+   れる。bodyは単純に、この仕様の目的のためには解釈されないtext の行の
+   連なりである。
+
+3.6.  Field Definitions
+3.6.  フィールドの定義
+
+   The header fields of a message are defined here.  All header fields
+   have the same general syntactic structure: a field name, followed by
+   a colon, followed by the field body.  The specific syntax for each
+   header field is defined in the subsequent sections.
+
+   ここではメッセージのヘッダーフィールドを定義する。全てのヘッダーフィー
+   ルドは一般的な構文上の構造を持っている。それは、フィールド名、コロ
+   ン、フィールド本文、と続く。後のセクションでは各ヘッダーフィールド
+   の仕様の文法を定義する。
+
+      Note: In the ABNF syntax for each field in subsequent sections,
+      each field name is followed by the required colon.  However, for
+      brevity, sometimes the colon is not referred to in the textual
+      description of the syntax.  It is, nonetheless, required.
+
+      注釈：後のセクションの各フィールドのABNF文法では、各フィールド名
+      には必ずコロンが続く。しかし、簡潔さのために、時々、文法の原文の
+      記述ではコロンは言及しない。とはいえ、コロンは必須である。
+
+   It is important to note that the header fields are not guaranteed to
+   be in a particular order.  They may appear in any order, and they
+   have been known to be reordered occasionally when transported over
+   the Internet.  However, for the purposes of this specification,
+   header fields SHOULD NOT be reordered when a message is transported
+   or transformed.  More importantly, the trace header fields and resent
+   header fields MUST NOT be reordered, and SHOULD be kept in blocks
+   prepended to the message.  See sections 3.6.6 and 3.6.7 for more
+   information.
+
+   ヘッダーフィールドは特定の順序にあることが保障されない、ということ
+   を言及しておくことが重要である。それらはどの順序で登場してもよく、
+   インターネット上を転送されるときに時々順序付けし直されることが知ら
+   れている。しかし、この仕様の狙いとしては、メッセージが転送や変換さ
+   れる際にヘッダーフィールドは順序付けし直すべきではない(SHOULD NOT)。
+   より重要なこととしてレースヘッダーフィールドや再送ヘッダーフィール
+   ドは順序付けし直してはならなく(MUST NOT)、メッセージの先頭に追加さ
+   れたブロックを保持しておくべきである(SHOULD)。さらなる情報は3.6.6章、
+   3.6.7章を見てほしい。
+
+   The only required header fields are the origination date field and
+   the originator address field(s).  All other header fields are
+   syntactically optional.  More information is contained in the table
+   following this definition.
+
+   唯一必須のヘッダーフィールドは発信日フィールドと発信元アドレスフィー
+   ルドである。全ての他のフィールドは意味的にはオプションである。さら
+   なる情報は以下の表に含まれている。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Resnick                     Standards Track                    [Page 19]
+
+RFC 5322                Internet Message Format             October 2008
+
+
+   fields          =   *(trace
+                         *optional-field /
+                         *(resent-date /
+                          resent-from /
+                          resent-sender /
+                          resent-to /
+                          resent-cc /
+                          resent-bcc /
+                          resent-msg-id))
+                       *(orig-date /
+                       from /
+                       sender /
+                       reply-to /
+                       to /
+                       cc /
+                       bcc /
+                       message-id /
+                       in-reply-to /
+                       references /
+                       subject /
+                       comments /
+                       keywords /
+                       optional-field)
+
+   The following table indicates limits on the number of times each
+   field may occur in the header section of a message as well as any
+   special limitations on the use of those fields.  An asterisk ("*")
+   next to a value in the minimum or maximum column indicates that a
+   special restriction appears in the Notes column.
+
+   以下の表では、フィールドの使用上の特殊な制限と同じように、各フィー
+   ルドがメッセージのヘッダーセクションで登場できる回数の制限が示して
+   ある。最小、最大の列にある値の隣のアスタリスク("*")は、注釈の列にあ
+   る特別な制限が現れることを意味する。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Resnick                     Standards Track                    [Page 20]
+
+RFC 5322                Internet Message Format             October 2008
+
+
+   +----------------+--------+------------+----------------------------+
+   | Field          | Min    | Max number | Notes                      |
+   |                | number |            |                            |
+   +----------------+--------+------------+----------------------------+
+   | trace          | 0      | unlimited  | Block prepended - see      |
+   |                |        |            | 3.6.7                      |
+   | resent-date    | 0*     | unlimited* | One per block, required if |
+   |                |        |            | other resent fields are    |
+   |                |        |            | present - see 3.6.6        |
+   | resent-from    | 0      | unlimited* | One per block - see 3.6.6  |
+   | resent-sender  | 0*     | unlimited* | One per block, MUST occur  |
+   |                |        |            | with multi-address         |
+   |                |        |            | resent-from - see 3.6.6    |
+   | resent-to      | 0      | unlimited* | One per block - see 3.6.6  |
+   | resent-cc      | 0      | unlimited* | One per block - see 3.6.6  |
+   | resent-bcc     | 0      | unlimited* | One per block - see 3.6.6  |
+   | resent-msg-id  | 0      | unlimited* | One per block - see 3.6.6  |
+   | orig-date      | 1      | 1          |                            |
+   | from           | 1      | 1          | See sender and 3.6.2       |
+   | sender         | 0*     | 1          | MUST occur with            |
+   |                |        |            | multi-address from - see   |
+   |                |        |            | 3.6.2                      |
+   | reply-to       | 0      | 1          |                            |
+   | to             | 0      | 1          |                            |
+   | cc             | 0      | 1          |                            |
+   | bcc            | 0      | 1          |                            |
+   | message-id     | 0*     | 1          | SHOULD be present - see    |
+   |                |        |            | 3.6.4                      |
+   | in-reply-to    | 0*     | 1          | SHOULD occur in some       |
+   |                |        |            | replies - see 3.6.4        |
+   | references     | 0*     | 1          | SHOULD occur in some       |
+   |                |        |            | replies - see 3.6.4        |
+   | subject        | 0      | 1          |                            |
+   | comments       | 0      | unlimited  |                            |
+   | keywords       | 0      | unlimited  |                            |
+   | optional-field | 0      | unlimited  |                            |
+   +----------------+--------+------------+----------------------------+
+
+   +----------------+--------+------------+----------------------------+
+   | フィールド     | 最少数 | 最大数     | 注釈                       |
+   +----------------+--------+------------+----------------------------+
+   | trace          | 0      | 制限なし   | ブロックの先頭に追加 -     |
+   |                |        |            | 3.6.7参照                  |
+   | resent-date    | 0*     | 制限なし*  | 1ブロックに1つ、他のresent |
+   |                |        |            | フィールドが与えられた場合 |
+   |                |        |            | は必要 - 3.6.6参照         |
+   | resent-from    | 0      | 制限なし*  | 1ブロックに1つ - 3.6.6参照 |
+   | resent-sender  | 0*     | 制限なし*  | 1ブロックに1つ、           |
+   |                |        |            | multi-address resent-from  |
+   |                |        |            | と一緒に現れなければならな |
+   |                |        |            | い(MUST) - 3.6.6参照       |
+   | resent-to      | 0      | 制限なし*  | 1ブロックに1つ - 3.6.6参照 |
+   | resent-cc      | 0      | 制限なし*  | 1ブロックに1つ - 3.6.6参照 |
+   | resent-bcc     | 0      | 制限なし*  | 1ブロックに1つ - 3.6.6参照 |
+   | resent-msg-id  | 0      | 制限なし*  | 1ブロックに1つ - 3.6.6参照 |
+   | orig-date      | 1      | 1          |                            |
+   | from           | 1      | 1          | sender, 3.6.2参照          |
+   | sender         | 0*     | 1          | multi-address from と一緒  |
+   |                |        |            | にあらわれなければならない |
+   |                |        |            | (MUST) - 3.6.2参照         |
+   | reply-to       | 0      | 1          |                            |
+   | to             | 0      | 1          |                            |
+   | cc             | 0      | 1          |                            |
+   | bcc            | 0      | 1          |                            |
+   | message-id     | 0*     | 1          | 現れるべき(SHOULD) -       |
+   |                |        |            | 3.6.4参照                  |
+   | in-reply-to    | 0*     | 1          | 返信時に現れるべき(SHOULD) |
+   |                |        |            | - 3.6.4参照                |
+   | references     | 0*     | 1          | 返信時に現れるべき(SHOULD) |
+   |                |        |            | - 3.6.4参照                |
+   | subject        | 0      | 1          |                            |
+   | comments       | 0      | 制限なし   |                            |
+   | keywords       | 0      | 制限なし   |                            |
+   | optional-field | 0      | 制限なし   |                            |
+   +----------------+--------+------------+----------------------------+
+
+   The exact interpretation of each field is described in subsequent
+   sections.
+
+   各フィールドの正確な解釈は後のセクションで記述します。
+
+
+
+
+
+
+
+
+
+Resnick                     Standards Track                    [Page 21]
+
+RFC 5322                Internet Message Format             October 2008
+
+
+3.6.1.  The Origination Date Field
+3.6.1.  送信日時フィールド
+
+   The origination date field consists of the field name "Date" followed
+   by a date-time specification.
+
+   送信日時フィールドは、フィールド名"Date"に続き、date-timeで構成され
+   る。
+
+   orig-date       =   "Date:" date-time CRLF
+
+   The origination date specifies the date and time at which the creator
+   of the message indicated that the message was complete and ready to
+   enter the mail delivery system.  For instance, this might be the time
+   that a user pushes the "send" or "submit" button in an application
+   program.  In any case, it is specifically not intended to convey the
+   time that the message is actually transported, but rather the time at
+   which the human or other creator of the message has put the message
+   into its final form, ready for transport.  (For example, a portable
+   computer user who is not connected to a network might queue a message
+   for delivery.  The origination date is intended to contain the date
+   and time that the user queued the message, not the time when the user
+   connected to the network to send the message.)
+
+   送信日時は、メッセージの作成者が、メッセージは完成してメール送信シ
+   ステムに入力する準備ができた、と示した時点での日付と時間の仕様を特
+   定する。例えば、これはユーザがアプリケーションの"送信"ボタンを押し
+   たときの時間かもしれない。とにかく、それは厳密にはメッセージが実際
+   に転送された時間を伝えるのを表したものではない。（例えば、ネットワー
+   クに接続していない携帯コンピュータユーザーは、メッセージを送信のた
+   めにキューに入れるかもしれない。送信日時はユーザーがメッセージをキュー
+   に入れた日付と時間を表し、ユーザーがメッセージを送信するためにネッ
+   トワークに接続した時間を表すものではない。）
+
+
+3.6.2.  Originator Fields
+3.6.2.  送信元フィールド
+
+   The originator fields of a message consist of the from field, the
+   sender field (when applicable), and optionally the reply-to field.
+   The from field consists of the field name "From" and a comma-
+   separated list of one or more mailbox specifications.  If the from
+   field contains more than one mailbox specification in the mailbox-
+   list, then the sender field, containing the field name "Sender" and a
+   single mailbox specification, MUST appear in the message.  In either
+   case, an optional reply-to field MAY also be included, which contains
+   the field name "Reply-To" and a comma-separated list of one or more
+   addresses.
+
+   メッセージの送信元フィールドは、fromフィールド、senderフィールド(適
+   用できる場合)、それとオプションで、reply-toフィールドで構成される。
+   fromフィールドはフィールド名"From"とコンマで区切られた1つ以上の
+   mailboxのリストで構成される。もし、fromフィールドがmailbox-listに2 
+   つ以上のmailboxを含む場合は、フィールド名"Sender"と1つのmailboxを含
+   むsenderフィールドがメッセージに現れなければならない(MUST)。どちら
+   にしても、フィールド名"Reply-To"とコンマで区切られた1つ以上のアドレ
+   スのリストを含む、オプションのreply-toフィールドもまた含まれるかも
+   しれない(MAY)。
+
+
+   from            =   "From:" mailbox-list CRLF
+
+   sender          =   "Sender:" mailbox CRLF
+
+   reply-to        =   "Reply-To:" address-list CRLF
+
+   The originator fields indicate the mailbox(es) of the source of the
+   message.  The "From:" field specifies the author(s) of the message,
+   that is, the mailbox(es) of the person(s) or system(s) responsible
+   for the writing of the message.  The "Sender:" field specifies the
+   mailbox of the agent responsible for the actual transmission of the
+   message.  For example, if a secretary were to send a message for
+   another person, the mailbox of the secretary would appear in the
+   "Sender:" field and the mailbox of the actual author would appear in
+   the "From:" field.  If the originator of the message can be indicated
+
+
+
+Resnick                     Standards Track                    [Page 22]
+
+RFC 5322                Internet Message Format             October 2008
+
+
+   by a single mailbox and the author and transmitter are identical, the
+   "Sender:" field SHOULD NOT be used.  Otherwise, both fields SHOULD
+   appear.
+
+   送信元フィールドはメッセージ送信元のメールボックスが含まれる。
+   "From:"フィールドはメッセージの作成者、つまり、メッセージを書いた人
+   かシステムのメールボックスを特定する。"Sender:"フィールドはメッセー
+   ジの実際の送信処理を行う者のメールボックス特定する。例えば、もし事
+   務員が他の人にメッセージを送るのであれば、"Sender:"フィールドには事
+   務員のメールボックスが現れ、"From:"フィールドには実際の作成者のメー
+   ルボックスが現れるであろう。もし、メッセージの送信元が単一のメール
+   ボックスで表すことができ、作成者と送信者が同一の場合、"Sender:"フィー
+   ルドは使うべきではない(SHOULD NOT)。そうでない場合は、両方のフィー
+   ルドを使うべきではない(SHOULD)。
+
+      Note: The transmitter information is always present.  The absence
+      of the "Sender:" field is sometimes mistakenly taken to mean that
+      the agent responsible for transmission of the message has not been
+      specified.  This absence merely means that the transmitter is
+      identical to the author and is therefore not redundantly placed
+      into the "Sender:" field.
+
+      注釈：送信者情報は常に与えられる。時々、"Sender:"フィールドの欠
+      如は間違って、メッセージを送信する者は特定されていない、という意
+      味とみなされる。この欠如は単に、送信者は作成者と同一で、ゆえに重
+      複して"Sender:"フィールドに置かれていない、というだけである。
+
+   The originator fields also provide the information required when
+   replying to a message.  When the "Reply-To:" field is present, it
+   indicates the address(es) to which the author of the message suggests
+   that replies be sent.  In the absence of the "Reply-To:" field,
+   replies SHOULD by default be sent to the mailbox(es) specified in the
+   "From:" field unless otherwise specified by the person composing the
+   reply.
+
+   送信元フィールドもまたメッセージへの返信の際に必要な情報を提供する。
+   "Reply-To:"フィールドが与えられたとき、それはメッセージの作成者が返
+   信することを勧めるaddressを示す。"Reply-To:"フィールドがない場合、
+   返信は、replyからなる人によって特定されていない限り、デフォルトで
+   "From:"フィールドで特定されているmailboxに送るべきである(SHOULD)。
+
+
+   In all cases, the "From:" field SHOULD NOT contain any mailbox that
+   does not belong to the author(s) of the message.  See also section
+   3.6.3 for more information on forming the destination addresses for a
+   reply.
+
+   全ての場合で、"From:"フィールドは、メッセージの作成者に属しない
+   mailboxを含むべきではない(SHOULD NOT)。返信用の宛先アドレスフィール
+   ドの形成のさらなる情報は3.6.3章を見てほしい。
+
+3.6.3.  Destination Address Fields
+3.6.3.  宛先アドレスフィールド
+
+   The destination fields of a message consist of three possible fields,
+   each of the same form: the field name, which is either "To", "Cc", or
+   "Bcc", followed by a comma-separated list of one or more addresses
+   (either mailbox or group syntax).
+
+   メッセージの宛先アドレスフィールドは形式が同じ3つの可能性のあるフィー
+   ルドから構成される。フィールド名が、"To"か"Cc"か"Bcc"で、それにコン
+   マで区切られた1つ以上のaddress(mailboxかgroup)が続く。
+
+   to              =   "To:" address-list CRLF
+
+   cc              =   "Cc:" address-list CRLF
+
+   bcc             =   "Bcc:" [address-list / CFWS] CRLF
+
+   The destination fields specify the recipients of the message.  Each
+   destination field may have one or more addresses, and the addresses
+   indicate the intended recipients of the message.  The only difference
+   between the three fields is how each is used.
+
+   宛先フィールドはメッセージの受信者を特定する。各宛先フィールドは1 
+   つ以上のaddressを持つことができ、addressは対象とするメッセージの受
+   信者を表す。3つのフィールドの唯一の違いは、使い方である。
+
+   The "To:" field contains the address(es) of the primary recipient(s)
+   of the message.
+
+   "To:"フィールドはメッセージの主要な受信者のaddressを含む。
+
+
+
+
+
+Resnick                     Standards Track                    [Page 23]
+
+RFC 5322                Internet Message Format             October 2008
+
+
+   The "Cc:" field (where the "Cc" means "Carbon Copy" in the sense of
+   making a copy on a typewriter using carbon paper) contains the
+   addresses of others who are to receive the message, though the
+   content of the message may not be directed at them.
+
+   "Cc:"フィールド（ここで"Cc"は、カーボン用紙を使ってタイプライターで
+   コピーを作るという意味の"Carbon Copy"を意味する）は、たとえ、そのメッ
+   セージの本文が彼らに向けられていなかったとしても、メッセージを受け
+   取る他のアドレスを含む。
+
+   The "Bcc:" field (where the "Bcc" means "Blind Carbon Copy") contains
+   addresses of recipients of the message whose addresses are not to be
+   revealed to other recipients of the message.  There are three ways in
+   which the "Bcc:" field is used.  In the first case, when a message
+   containing a "Bcc:" field is prepared to be sent, the "Bcc:" line is
+   removed even though all of the recipients (including those specified
+   in the "Bcc:" field) are sent a copy of the message.  In the second
+   case, recipients specified in the "To:" and "Cc:" lines each are sent
+   a copy of the message with the "Bcc:" line removed as above, but the
+   recipients on the "Bcc:" line get a separate copy of the message
+   containing a "Bcc:" line.  (When there are multiple recipient
+   addresses in the "Bcc:" field, some implementations actually send a
+   separate copy of the message to each recipient with a "Bcc:"
+   containing only the address of that particular recipient.)  Finally,
+   since a "Bcc:" field may contain no addresses, a "Bcc:" field can be
+   sent without any addresses indicating to the recipients that blind
+   copies were sent to someone.  Which method to use with "Bcc:" fields
+   is implementation dependent, but refer to the "Security
+   Considerations" section of this document for a discussion of each.
+
+   "Bcc:"フィールド（ここで"Bcc"は、"Blind Carbon Copy"を意味する）は、
+   メッセージの受信者のアドレスを含んでおり、そのアドレスは他の受信者
+   には公開されない。"Bcc:"フィールドが使われ方には3つある。1つ目は、
+   "Bcc:"フィールドを含んでいるメッセージが送信のために用意されている
+   ときで、たとえ受信者の全て（"Bcc:"フィールドで指定した受信者も含む）
+   にメッセージのコピーが送信されても、"Bcc:"の行は削除される。2つ目は、
+   "To:"と"Cc:"の行で特定されている受信者に、上記のように"Bcc:"の行を
+   削除されたメッセージのコピーを送信するが、"Bcc:"の行の受信者は
+   "Bcc:"の行を含む分割されたメッセージのコピーを受け取る。（"Bcc:"フィー
+   ルドに多数の受信アドレスがあるとき、分割されたメッセージのコピーを
+   その受信者のアドレスのみを含む"Bcc:"と共に各受信者に送る実装もある。）
+   最後は、"Bcc:"フィールドがアドレスを含んでいない場合で、"Bcc:"フィー
+   ルドはコピーを送る受信者を示すアドレスなしで送ることができる。その
+   ような"Bcc:"フィールドを使うメソッドは実装依存であるが、その議論の
+   ためには、このドキュメントの"セキュリティ考察"の章を参照してほしい。
+
+   When a message is a reply to another message, the mailboxes of the
+   authors of the original message (the mailboxes in the "From:" field)
+   or mailboxes specified in the "Reply-To:" field (if it exists) MAY
+   appear in the "To:" field of the reply since these would normally be
+   the primary recipients of the reply.  If a reply is sent to a message
+   that has destination fields, it is often desirable to send a copy of
+   the reply to all of the recipients of the message, in addition to the
+   author.  When such a reply is formed, addresses in the "To:" and
+   "Cc:" fields of the original message MAY appear in the "Cc:" field of
+   the reply, since these are normally secondary recipients of the
+   reply.  If a "Bcc:" field is present in the original message,
+   addresses in that field MAY appear in the "Bcc:" field of the reply,
+   but they SHOULD NOT appear in the "To:" or "Cc:" fields.
+
+   メッセージが他のメッセージへの返信であるときに、オリジナルメッセー
+   ジの作成者のmailbox（"From:"フィールド内のmailbox）や"Reply-To:"フィー
+   ルドで特定されるmailbox（もしあれば）は、それらは通常メッセージの主
+   要な返信の受信者であるので、返信の"To:"フィールドに現れてもよい
+   (MAY)。もし返信が宛先フィールドを持つメッセージに送られたのなら、作
+   成者に加えて、メッセージの全ての受信者への返信のコピーがよく記述さ
+   れる。そのような返信が作られたときに、通常は返信にあまり重要でない
+   受信者もいるので、オリジナルメッセージの"To:"や"Cc:"フィールドの
+   addressが返信の"Cc:"フィールドに現れてもよい(MAY)。もしオリジナルメッ
+   セージに"Bcc:"フィールドが与えられたときは、そのフィールドのaddress 
+   は返信の"Bcc:"フィールドに現れてもよい(MAY)が、"To:"や"Cc:"フィール
+   ドには現れるべきではない(SHOULD NOT)。
+
+      Note: Some mail applications have automatic reply commands that
+      include the destination addresses of the original message in the
+      destination addresses of the reply.  How those reply commands
+      behave is implementation dependent and is beyond the scope of this
+      document.  In particular, whether or not to include the original
+      destination addresses when the original message had a "Reply-To:"
+      field is not addressed here.
+
+      注釈：メールアプリケーションには、返信の宛先アドレスにオリジナル
+      メッセージの宛先アドレスを含む自動の返信コメントを持つものがある。
+      そのような返信コメントの振る舞いは実装依存であり、このドキュメン
+      トの適用範囲を超えている。とりわけ、オリジナルメッセージが
+      "Reply-To:"フィールドを持っているときに、オリジナルの宛先アドレ
+      スを含むか含まないか、ということについてはここでは取り組まない。
+
+
+
+Resnick                     Standards Track                    [Page 24]
+
+RFC 5322                Internet Message Format             October 2008
+
+	
+3.6.4.  Identification Fields
+3.6.4.  識別フィールド
+
+   Though listed as optional in the table in section 3.6, every message
+   SHOULD have a "Message-ID:" field.  Furthermore, reply messages
+   SHOULD have "In-Reply-To:" and "References:" fields as appropriate
+   and as described below.
+
+   3.6章ではたとえオプションとして表に載っていても、メッセージはいつで
+   も"Message-ID:"フィールドを持っているべきである(SHOULD)。さらに、返
+   信メッセージは適切かつ下で説明するように"In-Reply-To:"と
+   "References:"フィールドを持っているべきである(SHOULD)。
+
+   The "Message-ID:" field contains a single unique message identifier.
+   The "References:" and "In-Reply-To:" fields each contain one or more
+   unique message identifiers, optionally separated by CFWS.
+
+   "Message-ID:"フィールドは単独の一意なメッセージ識別子を含む。
+   "References:"と"In-Reply-To:"フィールドはそれぞれ、1つ以上の一意な
+   メッセージ識別子（任意でCFWSで区切られている）を含んでいる。
+
+   The message identifier (msg-id) syntax is a limited version of the
+   addr-spec construct enclosed in the angle bracket characters, "<" and
+   ">".  Unlike addr-spec, this syntax only permits the dot-atom-text
+   form on the left-hand side of the "@" and does not have internal CFWS
+   anywhere in the message identifier.
+
+   メッセージ識別子(msg-id)の文法は山括弧("<"と">")で囲まれたaddr-spec 
+   の構図の限定版である。addr-specdeとは異なって、この文法は"@"の左辺
+   でのdot-atom-text形式を可能にするためだけであり、メッセージ識別子の
+   どこにも内部のCFWSは持っていない。
+
+      Note: As with addr-spec, a liberal syntax is given for the right-
+      hand side of the "@" in a msg-id.  However, later in this section,
+      the use of a domain for the right-hand side of the "@" is
+      RECOMMENDED.  Again, the syntax of domain constructs is specified
+      by and used in other protocols (e.g., [RFC1034], [RFC1035],
+      [RFC1123], [RFC5321]).  It is therefore incumbent upon
+      implementations to conform to the syntax of addresses for the
+      context in which they are used.
+
+      注釈：addr-specと同様に、豊富な文法がmsg-idの"@"の右辺のために与
+      えられる。しかしながら、この章の文字は、"@"の右辺でのドメインの
+      使用が勧められている(RECOMMENDED)。再び、ドメイン構成の文法は他
+      のプロトコルで仕様が定められて、使われている（例えば、RFC1034,
+      RFC1035, RFC1123, RFC5321）。ゆえに、それらが使われている文脈の
+      addressの文法に従った実装を行う義務がある。
+
+   message-id      =   "Message-ID:" msg-id CRLF
+
+   in-reply-to     =   "In-Reply-To:" 1*msg-id CRLF
+
+   references      =   "References:" 1*msg-id CRLF
+
+   msg-id          =   [CFWS] "<" id-left "@" id-right ">" [CFWS]
+
+   id-left         =   dot-atom-text / obs-id-left
+
+   id-right        =   dot-atom-text / no-fold-literal / obs-id-right
+
+   no-fold-literal =   "[" *dtext "]"
+
+   The "Message-ID:" field provides a unique message identifier that
+   refers to a particular version of a particular message.  The
+   uniqueness of the message identifier is guaranteed by the host that
+   generates it (see below).  This message identifier is intended to be
+   machine readable and not necessarily meaningful to humans.  A message
+   identifier pertains to exactly one version of a particular message;
+   subsequent revisions to the message each receive new message
+   identifiers.
+
+   "Message-ID:"フィールドは特定のメッセージの特定のバージョンを参照す
+   る一意なメッセージ識別子を与える。メッセージ識別子の一意性はそれを
+   生成するホストによって保障される（以下参照）。このメッセージ識別子
+   は機械が読み込めることを意図しており、必ずしも人にとって意味のある
+   ものとは限らない。メッセージ識別子は特定のメッセージの1つのバージョ
+   ンに正確に関係する。メッセージはそれぞれその後の修正で新しいメッセー
+   ジ識別子を受け取る。
+
+
+Resnick                     Standards Track                    [Page 25]
+
+RFC 5322                Internet Message Format             October 2008
+
+
+      Note: There are many instances when messages are "changed", but
+      those changes do not constitute a new instantiation of that
+      message, and therefore the message would not get a new message
+      identifier.  For example, when messages are introduced into the
+      transport system, they are often prepended with additional header
+      fields such as trace fields (described in section 3.6.7) and
+      resent fields (described in section 3.6.6).  The addition of such
+      header fields does not change the identity of the message and
+      therefore the original "Message-ID:" field is retained.  In all
+      cases, it is the meaning that the sender of the message wishes to
+      convey (i.e., whether this is the same message or a different
+      message) that determines whether or not the "Message-ID:" field
+      changes, not any particular syntactic difference that appears (or
+      does not appear) in the message.
+
+      注釈：メッセージの"変更"には多くの場合があるが、それらの変更はメッ
+      セージの新たなインスタンス化を構成するものではない。ゆえに、メッ
+      セージは新しいメッセージ識別子を取得しないだろう。例えば、メッセー
+      ジが配送システムに取り入れられたときに、よく先頭にトレースフィー
+      ルド(3.6.7章で記述)や再送フィールド(3.6.6章で記述)のような追加の
+      ヘッダーフィールドが追加される。そのようなヘッダーフィールドの追
+      加はメッセージの同一性を変更しないので、元の"Message-ID:"フィー
+      ルドを保有する。全ての場合、メッセージの送信者は、メッセージが変
+      更されたか判断し、メッセージに現れる（現れない）特定の構文上の違
+      い、を伝達してほしい、ということを意味する。
+
+   The "In-Reply-To:" and "References:" fields are used when creating a
+   reply to a message.  They hold the message identifier of the original
+   message and the message identifiers of other messages (for example,
+   in the case of a reply to a message that was itself a reply).  The
+   "In-Reply-To:" field may be used to identify the message (or
+   messages) to which the new message is a reply, while the
+   "References:" field may be used to identify a "thread" of
+   conversation.
+
+   "In-Reply-To:"と"References:"フィールドはメッセージの返信を作るとき
+   に使われる。これらは元のメッセージのメッセージ識別子と他のメッセー
+   ジ（例えば、メッセージへの返信の場合、返信自身）のメッセージ識別子
+   を持っている。"In-Reply-To:"フィールドは新しいメッセージ（複数可）
+   が返信であるということを識別するに使われるかもしれない。さらに、
+   "References:"フィールドは会話の"スレッド"の識別に使われるかもしれな
+   い。
+
+   When creating a reply to a message, the "In-Reply-To:" and
+   "References:" fields of the resultant message are constructed as
+   follows:
+
+   メッセージへの返信を作る時は、得られたメッセージの"In-Reply-To:"と
+   "References:"フィールドは以下のように構成される。
+
+   The "In-Reply-To:" field will contain the contents of the
+   "Message-ID:" field of the message to which this one is a reply (the
+   "parent message").  If there is more than one parent message, then
+   the "In-Reply-To:" field will contain the contents of all of the
+   parents' "Message-ID:" fields.  If there is no "Message-ID:" field in
+   any of the parent messages, then the new message will have no "In-
+   Reply-To:" field.
+
+   "In-Reply-To:"フィールドは返信をするメッセージ（"親メッセージ"）の
+   "Message-ID:"フィールドの中身を含む。もし、親メッセージが2つ以上あ
+   る場合は、"In-Reply-To:"フィールドは全ての親の"Message-ID:"フィール
+   ドの中身を含む。もし、親メッセージに"Message-ID:"フィールドがない場
+   合は、新しいメッセージは"In-Reply-To:"フィールドを持たない。
+
+   The "References:" field will contain the contents of the parent's
+   "References:" field (if any) followed by the contents of the parent's
+   "Message-ID:" field (if any).  If the parent message does not contain
+   a "References:" field but does have an "In-Reply-To:" field
+   containing a single message identifier, then the "References:" field
+   will contain the contents of the parent's "In-Reply-To:" field
+   followed by the contents of the parent's "Message-ID:" field (if
+   any).  If the parent has none of the "References:", "In-Reply-To:",
+   or "Message-ID:" fields, then the new message will have no
+   "References:" field.
+
+   "References:"フィールドは、（もしあれば）親の"References:"フィール
+   ドの中身と、（もしあれば）それに続き、親の"Message-ID:"フィールドの
+   中身を含む。もし、親メッセージが"References:"フィールドを含んでいな
+   いが、単体のメッセージ識別子を含む"In-Reply-To:"フィールドを持って
+   いる場合は、"References:"フィールドは親の"In-Reply-To:"フィールドの
+   中身と、（もしあれば）それに続き、親の"Message-ID:"フィールドの中身
+   を含んでいる。もし、親が"References:", "In-Reply-To:",
+   "Message-ID:"フィールドを持っていなけば、新しいメッセージは
+   "References:"フィールドは持たない。
+
+
+
+Resnick                     Standards Track                    [Page 26]
+
+RFC 5322                Internet Message Format             October 2008
+
+
+      Note: Some implementations parse the "References:" field to
+      display the "thread of the discussion".  These implementations
+      assume that each new message is a reply to a single parent and
+      hence that they can walk backwards through the "References:" field
+      to find the parent of each message listed there.  Therefore,
+      trying to form a "References:" field for a reply that has multiple
+      parents is discouraged; how to do so is not defined in this
+      document.
+
+      注釈："議論のスレッド"を表示するために"References:"フィールドを
+      構文解析する実装もある。そのような実装は、新しいメッセージそれぞ
+      れは単一の親への返信であるので、リスト化された各メッセージの親を
+      探すために"References:"フィールドを介して後戻りできる、というこ
+      とを前提としている。よって、親を複数持つ返信のために
+      "References:"フィールドを整形しようとすることは阻止される。その
+      やり方はこのドキュメントでは定義されない。
+
+   The message identifier (msg-id) itself MUST be a globally unique
+   identifier for a message.  The generator of the message identifier
+   MUST guarantee that the msg-id is unique.  There are several
+   algorithms that can be used to accomplish this.  Since the msg-id has
+   a similar syntax to addr-spec (identical except that quoted strings,
+   comments, and folding white space are not allowed), a good method is
+   to put the domain name (or a domain literal IP address) of the host
+   on which the message identifier was created on the right-hand side of
+   the "@" (since domain names and IP addresses are normally unique),
+   and put a combination of the current absolute date and time along
+   with some other currently unique (perhaps sequential) identifier
+   available on the system (for example, a process id number) on the
+   left-hand side.  Though other algorithms will work, it is RECOMMENDED
+   that the right-hand side contain some domain identifier (either of
+   the host itself or otherwise) such that the generator of the message
+   identifier can guarantee the uniqueness of the left-hand side within
+   the scope of that domain.
+
+   メッセージ識別子(msg-id)自身は全体を通してメッセージに対して一意の
+   識別子でなければならない(MUST)。メッセージ識別子のジェネレーターは
+   msg-idが一意であることを保障しなければならない(MUST)。これを実現す
+   るのに使えるアルゴリズムはいくつもある。msg-idはaddr-specと似たよう
+   な文法（引用文字列、コメント、空白の折り返しを除いたものと同じもの
+   が許される）を持つので、優良な手法とは、"@"の右辺（ドメイン名とIPア
+   ドレスは通常一意）にメッセージ識別子を作るホストのドメイン名（やド
+   メインリテラルIPアドレス）を表現し、左辺にシステム（例えば、プロセ
+   スID番号）で利用可能な他の現在の一意な（もしかしたら、シーケンシャ
+   ルな）識別子と現在の絶対日付と絶対時間の組み合わせを表現するもので
+   ある。たとえ他のアルゴリズムが機能しても、右辺はメッセージ識別子の
+   ジェネレーターがそのドメインの領域で左辺の一意性を保障できる、とい
+   ういくつかのドメイン識別子（ホスト名自身や他の）を含んでいることが
+   推奨される(RECOMMENDED)。
+
+   Semantically, the angle bracket characters are not part of the
+   msg-id; the msg-id is what is contained between the two angle bracket
+   characters.
+
+   意味的には、山括弧文字はmsg-idの一部ではない。msg-idは2つの山括弧文
+   字の間に含まれるものである。
+
+
+3.6.5.  Informational Fields
+3.6.5.  情報フィールド
+
+   The informational fields are all optional.  The "Subject:" and
+   "Comments:" fields are unstructured fields as defined in section
+   2.2.1, and therefore may contain text or folding white space.  The
+   "Keywords:" field contains a comma-separated list of one or more
+   words or quoted-strings.
+
+   情報フィールドは全てオプションである。"Subject:"と"Comments:"フィー
+   ルドは2.2.1章で定義された非構造化フィールドであるので、テキストや空
+   白の折り返しを含むことができる。"Keywords:"フィールドはコンマ区切り
+   の1つ以上の単語かquoted-stringである。
+
+   subject         =   "Subject:" unstructured CRLF
+
+   comments        =   "Comments:" unstructured CRLF
+
+   keywords        =   "Keywords:" phrase *("," phrase) CRLF
+
+   These three fields are intended to have only human-readable content
+   with information about the message.  The "Subject:" field is the most
+   common and contains a short string identifying the topic of the
+
+
+
+Resnick                     Standards Track                    [Page 27]
+
+RFC 5322                Internet Message Format             October 2008
+
+
+   message.  When used in a reply, the field body MAY start with the
+   string "Re: " (an abbreviation of the Latin "in re", meaning "in the
+   matter of") followed by the contents of the "Subject:" field body of
+   the original message.  If this is done, only one instance of the
+   literal string "Re: " ought to be used since use of other strings or
+   more than one instance can lead to undesirable consequences.  The
+   "Comments:" field contains any additional comments on the text of the
+   body of the message.  The "Keywords:" field contains a comma-
+   separated list of important words and phrases that might be useful
+   for the recipient.
+
+   これら3つのフィールドは、メッセージに関する情報で人が読める内容のみ
+   を持っていることを意味する。"Subject:"フィールドは最も共通で、メッ
+   セージの主題を特定する短い文字列を含んでいる。返信で使う場合、フィー
+   ルド本文は"Re: "（ラテン語で"～に関して"を意味する"in re"の省略形）
+   から始まり、元のメッセージの"Subject:"のフィールド本文の内容が続い
+   てもよい(MAY)。そうすると、他の文字列や2つ以上のインスタンスの使用
+   は好ましくない結果を導くので、文字列リテラル"Re: "のインスタンスは
+   一つだけが使われるべきである。"Comments:"フィールドはメッセージの本
+   文のテキストの追加のコメントを含む。"Keywords:"フィールドはコンマ区
+   切りの受信者にとって便利で重要な単語や語句を含む。
+
+
+3.6.6.  Resent Fields
+3.6.6.  再送フィールド
+
+   Resent fields SHOULD be added to any message that is reintroduced by
+   a user into the transport system.  A separate set of resent fields
+   SHOULD be added each time this is done.  All of the resent fields
+   corresponding to a particular resending of the message SHOULD be
+   grouped together.  Each new set of resent fields is prepended to the
+   message; that is, the most recent set of resent fields appears
+   earlier in the message.  No other fields in the message are changed
+   when resent fields are added.
+
+   再送フィールドは、ユーザーによって転送システムに再導入されるメッセー
+   ジに追加されるべきである(SHOULD)。分割された再送フィールドのセット
+   は、それが完了した各時間を追加すべきである(SHOULD)。メッセージの特
+   定の再送に対応する全ての再送フィールドは一緒にグループ化すべきであ
+   る(SHOULD)。再送フィールドの新しい各セットは、メッセージの先頭に追
+   加する。つまり、再送フィールドの最近の多くのセットは、メッセージの
+   早いうちに登場する。
+
+   Each of the resent fields corresponds to a particular field elsewhere
+   in the syntax.  For instance, the "Resent-Date:" field corresponds to
+   the "Date:" field and the "Resent-To:" field corresponds to the "To:"
+   field.  In each case, the syntax for the field body is identical to
+   the syntax given previously for the corresponding field.
+
+   各再送フィールドは文法のほかの場所の特定のフィールドに対応する。例
+   えば、"Resent-Date:"フィールドは"Data:"フィールドに対応し、
+   "Resent-To:"フィールドは"To:"フィールドに対応する。いずれの場合も、
+   フィールド本文の文法は対応するフィールドのために以前に与えられた文
+   法と同じである。
+
+   When resent fields are used, the "Resent-From:" and "Resent-Date:"
+   fields MUST be sent.  The "Resent-Message-ID:" field SHOULD be sent.
+   "Resent-Sender:" SHOULD NOT be used if "Resent-Sender:" would be
+   identical to "Resent-From:".
+
+   再送フィールドが使われるときは、"Resent-From:"と"Resent-Date:"フィー
+   ルドを送らなければならない(MUST)。"Resent-Message-ID:"フィールドは
+   送るべきである(SHOULD)。もし、"Resent-Sender:"が"Resent-From:"と同
+   じであれば、"Resent-Sender:"は使うべきではない(SHOULD NOT)。
+
+	
+   resent-date     =   "Resent-Date:" date-time CRLF
+
+   resent-from     =   "Resent-From:" mailbox-list CRLF
+
+   resent-sender   =   "Resent-Sender:" mailbox CRLF
+
+   resent-to       =   "Resent-To:" address-list CRLF
+
+   resent-cc       =   "Resent-Cc:" address-list CRLF
+
+   resent-bcc      =   "Resent-Bcc:" [address-list / CFWS] CRLF
+
+   resent-msg-id   =   "Resent-Message-ID:" msg-id CRLF
+
+
+
+
+
+Resnick                     Standards Track                    [Page 28]
+
+RFC 5322                Internet Message Format             October 2008
+
+
+   Resent fields are used to identify a message as having been
+   reintroduced into the transport system by a user.  The purpose of
+   using resent fields is to have the message appear to the final
+   recipient as if it were sent directly by the original sender, with
+   all of the original fields remaining the same.  Each set of resent
+   fields correspond to a particular resending event.  That is, if a
+   message is resent multiple times, each set of resent fields gives
+   identifying information for each individual time.  Resent fields are
+   strictly informational.  They MUST NOT be used in the normal
+   processing of replies or other such automatic actions on messages.
+
+   再送フィールドは、ユーザーによって転送システムに再投入されたメッセー
+   ジを特定するのに使われる。再送フィールドを使う目的は、まるで元の送
+   信者は直接送ったかのように、全ての元のフィールドを同じものがあり、
+   最後の受信者に現れるメッセージを持つためである。再送フィールドの各
+   セットは特定の再送イベントに対応する。つまり、もし、メッセージが複
+   数回再送されても、再送フィールドの各セットは、それぞれの場合で同一
+   の情報を与える。再送フィールドは厳密に情報を含む。それらは通常の処
+   理やメッセージの返信や他の自動処理で使ってはならない(MUST NOT)。
+
+      Note: Reintroducing a message into the transport system and using
+      resent fields is a different operation from "forwarding".
+      "Forwarding" has two meanings: One sense of forwarding is that a
+      mail reading program can be told by a user to forward a copy of a
+      message to another person, making the forwarded message the body
+      of the new message.  A forwarded message in this sense does not
+      appear to have come from the original sender, but is an entirely
+      new message from the forwarder of the message.  Forwarding may
+      also mean that a mail transport program gets a message and
+      forwards it on to a different destination for final delivery.
+      Resent header fields are not intended for use with either type of
+      forwarding.
+
+      注釈：メッセージの転送システムへの再投入と、再送フィールドの使用
+      は"転送"とは違う動作である。"転送"には2つの意味があり、1つはメー
+      ルプログラムがユーザーによってメッセージのコピーを他の人に送られ
+      る、新しいメッセージの本文に転送メッセージを作ること。この意味で
+      の転送メッセージは元の送信者から来たと表示されないが、完全にメッ
+      セージの転送者からの新たなメッセージとなる。転送は、メール転送プ
+      ログラムがメッセージを取得し、最終配信で別の宛先へ転送することも
+      意味するかもしれない。再送ヘッダーフィールドは転送の種類を意味し
+      ない。
+
+   The resent originator fields indicate the mailbox of the person(s) or
+   system(s) that resent the message.  As with the regular originator
+   fields, there are two forms: a simple "Resent-From:" form, which
+   contains the mailbox of the individual doing the resending, and the
+   more complex form, when one individual (identified in the "Resent-
+   Sender:" field) resends a message on behalf of one or more others
+   (identified in the "Resent-From:" field).
+
+   再送発信元フィールドは、メッセージを再送した人やシステムのmailboxを
+   示す。通常の発信元フィールドと同様に、2つの形式がある。単純な
+   "Resent-From:"、これは再送した個々のmailboxを含み、より複雑な形式は
+   （"Resent-Sender:"フィールドで特定される）個体がメッセージを1つ以上
+   の他の（"Resent-From:"フィールドで特定される）個体へ再送する。
+
+      Note: When replying to a resent message, replies behave just as
+      they would with any other message, using the original "From:",
+      "Reply-To:", "Message-ID:", and other fields.  The resent fields
+      are only informational and MUST NOT be used in the normal
+      processing of replies.
+  
+      注釈：再送メッセージに返信するときは、返信は、元の"From:",
+      "Reply-To:", "Message-ID:"と他のフィールドを使って、他のメッセー
+      ジと同じように振舞う。再送フィールドはただの情報で、通常の返信の
+      処理で使ってはならない(MUST NOT)。
+
+   The "Resent-Date:" indicates the date and time at which the resent
+   message is dispatched by the resender of the message.  Like the
+   "Date:" field, it is not the date and time that the message was
+   actually transported.
+
+   "Resent-Date:"は、再送メッセージがメッセージの再送信者によって送信
+   された日時を示す。"Date:"フィールドのように、メッセージが実際に転送
+   された時間ではない。
+
+   The "Resent-To:", "Resent-Cc:", and "Resent-Bcc:" fields function
+   identically to the "To:", "Cc:", and "Bcc:" fields, respectively,
+   except that they indicate the recipients of the resent message, not
+   the recipients of the original message.
+
+   "Resent-To:", "Resent-Cc:", "Resent-Bcc:"フィールドは、それぞれ、再
+   送メッセージの受信者を示して、元のメッセージの受信者を示すわけでは
+   ない、ということを除き、"To:","Cc:", "Bcc:"フィールドと同じように機
+   能する。
+
+
+Resnick                     Standards Track                    [Page 29]
+
+RFC 5322                Internet Message Format             October 2008
+
+
+   The "Resent-Message-ID:" field provides a unique identifier for the
+   resent message.
+
+   "Resent-Message-ID:"フィールドは再送メッセージに一意な識別子を与え
+   る。
+
+3.6.7.  Trace Fields
+3.6.7.  トレースフィールド
+
+   The trace fields are a group of header fields consisting of an
+   optional "Return-Path:" field, and one or more "Received:" fields.
+   The "Return-Path:" header field contains a pair of angle brackets
+   that enclose an optional addr-spec.  The "Received:" field contains a
+   (possibly empty) list of tokens followed by a semicolon and a date-
+   time specification.  Each token must be a word, angle-addr, addr-
+   spec, or a domain.  Further restrictions are applied to the syntax of
+   the trace fields by specifications that provide for their use, such
+   as [RFC5321].
+
+   トレースフィールドは、オプションの"Return-Path:"フィールドと1つ以上
+   の"Received:"フィールドからなるヘッダーフィールドのグループである。
+   "Return-Path:"ヘッダーフィールドは、オプションのaddr-specを囲う山括
+   弧のペアを含んでいる。"Received:"フィールドは、セミコロン、
+   date-timeと続くトークンのリスト（空でもよい）を含んでいる。各トーク
+   ンはword, angle-addr, addr-spec, domainでなければならない。使用する
+   ためには、RFC5321のように、さらに制約がトレースフィールドの文法に適
+   用される。
+
+   trace           =   [return]
+                       1*received
+
+   return          =   "Return-Path:" path CRLF
+
+   path            =   angle-addr / ([CFWS] "<" [CFWS] ">" [CFWS])
+
+   received        =   "Received:" *received-token ";" date-time CRLF
+
+   received-token  =   word / angle-addr / addr-spec / domain
+
+   A full discussion of the Internet mail use of trace fields is
+   contained in [RFC5321].  For the purposes of this specification, the
+   trace fields are strictly informational, and any formal
+   interpretation of them is outside of the scope of this document.
+
+   トレースフィールドのインターネットメール使用の完全な議論はRFC5321に
+   含まれている。この仕様の目的のために、トレースフィールドが完全に情
+   報であり、それらの正規の解釈はこのドキュメントの適用範囲外である。
+
+3.6.8.  Optional Fields
+3.6.8.  オプションフィールド
+
+   Fields may appear in messages that are otherwise unspecified in this
+   document.  They MUST conform to the syntax of an optional-field.
+   This is a field name, made up of the printable US-ASCII characters
+   except SP and colon, followed by a colon, followed by any text that
+   conforms to the unstructured syntax.
+
+   フィールドはメッセージに表示してもよく、そうでなければこのドキュメ
+   ントでは特定されない。それらはoptional-fieldの文法に従わなければな
+   らない(MUST)。これはSPとコロンを除く表示可能なUS-ASCII文字で構成さ
+   れたフィールド名で、コロン、非構造化文法に従ったテキストと続く。
+
+   The field names of any optional field MUST NOT be identical to any
+   field name specified elsewhere in this document.
+
+   オプションフィールドのフィールド名は、このドキュメントの他の場所で
+   特定されているフィールド名と同じであってはならない(MUST NOT)。
+
+
+
+
+
+
+
+Resnick                     Standards Track                    [Page 30]
+
+RFC 5322                Internet Message Format             October 2008
+
+
+   optional-field  =   field-name ":" unstructured CRLF
+
+   field-name      =   1*ftext
+
+   ftext           =   %d33-57 /          ; Printable US-ASCII
+                       %d59-126           ;  characters not including
+                                          ;  ":".
+                                          ; ":"を含まない表示可能な
+                                          ;   US-ASCII文字
+
+   For the purposes of this specification, any optional field is
+   uninterpreted.
+
+   この仕様の目的のために、オプションフィールドは解釈されない。
+
+
+4.  Obsolete Syntax
+4.  廃止された文法
+
+   Earlier versions of this specification allowed for different (usually
+   more liberal) syntax than is allowed in this version.  Also, there
+   have been syntactic elements used in messages on the Internet whose
+   interpretations have never been documented.  Though these syntactic
+   forms MUST NOT be generated according to the grammar in section 3,
+   they MUST be accepted and parsed by a conformant receiver.  This
+   section documents many of these syntactic elements.  Taking the
+   grammar in section 3 and adding the definitions presented in this
+   section will result in the grammar to use for the interpretation of
+   messages.
+
+   この仕様の前のバージョンは違う（通常、よりゆるい）文法を許した。ま
+   た、それらはインターネット上のメッセージで使われている構文要素であ
+   り、その解釈は決してドキュメント化されていなかった。たとえそれら構
+   文上の形式が3章の文法に従って生成されるべきではない(MUST NOT)として
+   も、受信者によって受け入れ、構文解析されなければならない(MUST)。こ
+   の章は多くのそれら構文要素をドキュメント化する。3章の文法を取り上げ、
+   この章で表現した定義を追加することは、メッセージの解釈のために使用
+   できる文法になる。
+
+      Note: This section identifies syntactic forms that any
+      implementation MUST reasonably interpret.  However, there are
+      certainly Internet messages that do not conform to even the
+      additional syntax given in this section.  The fact that a
+      particular form does not appear in any section of this document is
+      not justification for computer programs to crash or for malformed
+      data to be irretrievably lost by any implementation.  It is up to
+      the implementation to deal with messages robustly.
+
+      注釈：この章では、実装が完全ではないが満足のいく程度に解釈しなけ
+      ればならない(MUST)構文形式を定義する。しかし、この章で与えた追加
+      の文法にさえ従わないインターネットメッセージは確かに存在する。特
+      定の形式がこのドキュメントのどの章でも表現されていないという事実
+      は、実装によって、コンピュータープログラムがクラッシュすることや、
+      不正な形式のデータのために回復できないほどに失ってしまうことを当
+      化するものではない。それは確実にメッセージを処理する実装次第であ
+      る。
+
+   One important difference between the obsolete (interpreting) and the
+   current (generating) syntax is that in structured header field bodies
+   (i.e., between the colon and the CRLF of any structured header
+   field), white space characters, including folding white space, and
+   comments could be freely inserted between any syntactic tokens.  This
+   allowed many complex forms that have proven difficult for some
+   implementations to parse.
+
+   廃れた（解釈する）文法と現在の（生成する）文法との1つの重要な違いは、
+   構造化ヘッダーフィールド本文（すなわち、構造化ヘッダーフィールドで
+   のコロンとCRLFの間）内での空白文字、空白の折り返し、コメントが自由
+   に構文トークンの間に挿入できるということである。これは実装で構文解
+   析するのが難しいとわかっている多くの複雑な形式を許可することになる。
+
+   Another key difference between the obsolete and the current syntax is
+   that the rule in section 3.2.2 regarding lines composed entirely of
+   white space in comments and folding white space does not apply.  See
+   the discussion of folding white space in section 4.2 below.
+
+   廃れた文法と現在の文法の違いのもうひとつのキーは、ほとんどがコメン
+   ト内の空白文字と空白の折り返しだけで構成された行を考慮した3.2.2章で
+   の規則は、適用しないということである。4.2章以降の空白の折り返しの議
+   論を見てほしい。
+
+   Finally, certain characters that were formerly allowed in messages
+   appear in this section.  The NUL character (ASCII value 0) was once
+
+
+
+Resnick                     Standards Track                    [Page 31]
+
+RFC 5322                Internet Message Format             October 2008
+
+
+   allowed, but is no longer for compatibility reasons.  Similarly, US-
+   ASCII control characters other than CR, LF, SP, and HTAB (ASCII
+   values 1 through 8, 11, 12, 14 through 31, and 127) were allowed to
+   appear in header field bodies.  CR and LF were allowed to appear in
+   messages other than as CRLF; this use is also shown here.
+
+   最終的に、この章では、以前はメッセージ内で許されていた特定のキャラ
+   クターが現れる。NUL文字（ASCII値 0）が一度許されていたが、互換性の
+   理由でもはや許されていない。同様に、CR, LF, SP, HTAB（ASCII値 1～8,
+   11, 12, 14～31, 127）以外のUS-ASCIIコントロール文字がヘッダーフィー
+   ルド本文に現れるのが許されていた。CRとLFはCRLFとして以外でメッセー
+   ジに現れるのが許されていた。この使い方はここでも示す。
+
+   Other differences in syntax and semantics are noted in the following
+   sections.
+
+   他の文法や意味的な違いは以下の章で言及する。
+
+4.1.  Miscellaneous Obsolete Tokens
+4.1.  廃止された様々なトークン
+
+   These syntactic elements are used elsewhere in the obsolete syntax or
+   in the main syntax.  Bare CR, bare LF, and NUL are added to obs-qp,
+   obs-body, and obs-unstruct.  US-ASCII control characters are added to
+   obs-qp, obs-unstruct, obs-ctext, and obs-qtext.  The period character
+   is added to obs-phrase.  The obs-phrase-list provides for a
+   (potentially empty) comma-separated list of phrases that may include
+   "null" elements.  That is, there could be two or more commas in such
+   a list with nothing in between them, or commas at the beginning or
+   end of the list.
+
+   これらの構文要素は廃止された文法やメインの文法のほかの場所で使われ
+   る。空のCR, 空のLFとNULはobs-qp, obs-body, obs-unstructに追加する。
+   US-ASCIIコントロール文字はobs-qp, obs-unstruct, obs-ctext,
+   obs-qtextに追加する。終端文字はobs-pharaseに追加する。
+   obs-phrase-listは、"null"要素を含んでもよい（空の可能性のある）表現
+   のコンマ区切りのリストのために提供する。つまり、それらはそのような
+   間に何もないリストで2つ以上のコンマがあったり、リストの最初か最後が
+   コンマであってもよい。
+
+      Note: The "period" (or "full stop") character (".") in obs-phrase
+      is not a form that was allowed in earlier versions of this or any
+      other specification.  Period (nor any other character from
+      specials) was not allowed in phrase because it introduced a
+      parsing difficulty distinguishing between phrases and portions of
+      an addr-spec (see section 4.4).  It appears here because the
+      period character is currently used in many messages in the
+      display-name portion of addresses, especially for initials in
+      names, and therefore must be interpreted properly.
+
+      注釈：obs-phrase内の"ピリオド"(もしくは、"完全終了")文字(".")は、
+      本仕様や他の仕様の前のバージョンで許可された形式ではない。ピリオ
+      ド（や特殊文字が提供している他のどの文字も）は、表現と
+      addr-spec(4.4章参照) の部分を区別するのが難しい構文解析を導入す
+      ることになるので、表現として許可されていない。それは、ピリオドが
+      現在、address特に名前の頭文字のdisplay-name部分内の多くのメッセー
+      ジ使われているので、ここで現れ、ゆえに、適切に解釈されなければな
+      らない。
+
+   obs-NO-WS-CTL   =   %d1-8 /            ; US-ASCII control
+                       %d11 /             ;  characters that do not
+                       %d12 /             ;  include the carriage
+                       %d14-31 /          ;  return, line feed, and
+                       %d127              ;  white space characters
+                                          ; CR, LF, WSPを含まない
+                                          ;  US-ASCIIコントロール文字
+
+   obs-ctext       =   obs-NO-WS-CTL
+
+   obs-qtext       =   obs-NO-WS-CTL
+
+   obs-utext       =   %d0 / obs-NO-WS-CTL / VCHAR
+
+   obs-qp          =   "\" (%d0 / obs-NO-WS-CTL / LF / CR)
+
+   obs-body        =   *((*LF *CR *((%d0 / text) *LF *CR)) / CRLF)
+
+   obs-unstruct    =   *((*LF *CR *(obs-utext *LF *CR)) / FWS)
+
+
+
+Resnick                     Standards Track                    [Page 32]
+
+RFC 5322                Internet Message Format             October 2008
+
+
+   obs-phrase      =   word *(word / "." / CFWS)
+
+   obs-phrase-list =   [phrase / CFWS] *("," [phrase / CFWS])
+
+   Bare CR and bare LF appear in messages with two different meanings.
+   In many cases, bare CR or bare LF are used improperly instead of CRLF
+   to indicate line separators.  In other cases, bare CR and bare LF are
+   used simply as US-ASCII control characters with their traditional
+   ASCII meanings.
+
+   そのままのCRとLFは2つの違う意味でメッセージに現れる。多くの場合、そ
+   のままのCRやLFは行のセパレーターを示すためにCRLFの代わりに不適切に
+   使用されている。他の場合、そのままのCRとLFは単に従来のASCIIの意味を
+   持つUS-ASCIIコントロール文字として使われている。
+
+4.2.  Obsolete Folding White Space
+4.2.  廃止された空白の折り返し(FWS)
+
+   In the obsolete syntax, any amount of folding white space MAY be
+   inserted where the obs-FWS rule is allowed.  This creates the
+   possibility of having two consecutive "folds" in a line, and
+   therefore the possibility that a line which makes up a folded header
+   field could be composed entirely of white space.
+
+   廃止された文法では、空白の折り返しはobs-FWS規則が許可されている場所
+   にいくらでも挿入してよい(MAY)。これは、1行内に2つの連続した"折り返
+   し"をもつ可能性と、ゆえに、折り返したヘッダーフィールドで構成した行
+   が空白文字だけで構成できる可能性を作り出す。
+
+   obs-FWS         =   1*WSP *(CRLF 1*WSP)
+
+4.3.  Obsolete Date and Time
+4.3.  廃止された日付・時間
+
+   The syntax for the obsolete date format allows a 2 digit year in the
+   date field and allows for a list of alphabetic time zone specifiers
+   that were used in earlier versions of this specification.  It also
+   permits comments and folding white space between many of the tokens.
+
+   廃止された日付・時間の文法は、日付フィールドに2桁の年やこの仕様の前
+   のバージョンで使われていたアルファベットのタイムゾーン指定子のリス
+   トを許可する。それもまた、多くトークンの間で、コメントや空白の折り
+   返しを許可する。
+
+   obs-day-of-week =   [CFWS] day-name [CFWS]
+
+   obs-day         =   [CFWS] 1*2DIGIT [CFWS]
+
+   obs-year        =   [CFWS] 2*DIGIT [CFWS]
+
+   obs-hour        =   [CFWS] 2DIGIT [CFWS]
+
+   obs-minute      =   [CFWS] 2DIGIT [CFWS]
+
+   obs-second      =   [CFWS] 2DIGIT [CFWS]
+
+   obs-zone        =   "UT" / "GMT" /     ; Universal Time
+                                          ; 世界標準時
+
+                                          ; North American UT
+                                          ; offsets
+                       "EST" / "EDT" /    ; Eastern:  - 5/ - 4
+                       "CST" / "CDT" /    ; Central:  - 6/ - 5
+                       "MST" / "MDT" /    ; Mountain: - 7/ - 6
+                       "PST" / "PDT" /    ; Pacific:  - 8/ - 7
+                                          
+
+
+
+Resnick                     Standards Track                    [Page 33]
+
+RFC 5322                Internet Message Format             October 2008
+
+
+                       %d65-73 /          ; Military zones - "A"
+                       %d75-90 /          ; through "I" and "K"
+                       %d97-105 /         ; through "Z", both
+                       %d107-122          ; upper and lower case
+
+                                          ; 北アメリカ標準時は
+                                          ; 東部　　： - 5/ - 4
+                                          ; 中央部　： - 6/ - 5
+                                          ; 山岳部　： - 7/ - 6
+                                          ; 太平洋部： - 8/ - 7
+                                          ; 軍用時間 - "A"～"I"
+                                          ;  "K"～"Z"の大文字小文字
+                                          ;  両方 
+
+
+   Where a two or three digit year occurs in a date, the year is to be
+   interpreted as follows: If a two digit year is encountered whose
+   value is between 00 and 49, the year is interpreted by adding 2000,
+   ending up with a value between 2000 and 2049.  If a two digit year is
+   encountered with a value between 50 and 99, or any three digit year
+   is encountered, the year is interpreted by adding 1900.
+
+   ここで、日付に2, 3桁の年が現れるのは、年が以下のように解釈されるた
+   めである。もし、値が00から49の2桁の年に出くわしたら、年は2000年に追
+   加して解釈され、2000年から2049年で終わる。もし、2桁の年が50から99の
+   値で出くわすか、3桁の年に出くわしたら、年は1900年に加算して解釈され
+   る。
+
+   In the obsolete time zone, "UT" and "GMT" are indications of
+   "Universal Time" and "Greenwich Mean Time", respectively, and are
+   both semantically identical to "+0000".
+ 
+   廃止されたタイムゾーン内で、"UT"と"GMT"は"世界標準時(Universal
+   Time)"と"グリニッジ標準時(Greenwich Mean Time)"を意味し、それぞれ、
+   意味的に共に同じ"+0000"である。
+
+   The remaining three character zones are the US time zones.  The first
+   letter, "E", "C", "M", or "P" stands for "Eastern", "Central",
+   "Mountain", and "Pacific".  The second letter is either "S" for
+   "Standard" time, or "D" for "Daylight Savings" (or summer) time.
+   Their interpretations are as follows:
+
+   残りの3文字のゾーンはUSタイムゾーンである。1文字目は、"E", "C",
+   "M", "P"で、"東部(Eastern)", "中央部(Central)", "山岳部(Mountain)",
+   "太平洋部(Pacific)"という意味である。2文字目は、"標準(Standard)"時
+   間の"S"か、"夏(Daylight Savings (or summer))"時間の"D"である。これ
+   らの解釈は以下のようになる。
+
+      EDT is semantically equivalent to -0400
+      EST is semantically equivalent to -0500
+      CDT is semantically equivalent to -0500
+      CST is semantically equivalent to -0600
+      MDT is semantically equivalent to -0600
+      MST is semantically equivalent to -0700
+      PDT is semantically equivalent to -0700
+      PST is semantically equivalent to -0800
+
+      「EDT」は意味的に「-0400」と同値
+      「EST」は意味的に「-0500」と同値
+      「CDT」は意味的に「-0500」と同値
+      「CST」は意味的に「-0600」と同値
+      「MDT」は意味的に「-0600」と同値
+      「MST」は意味的に「-0700」と同値
+      「PDT」は意味的に「-0700」と同値
+      「PST」は意味的に「-0800」と同値
+
+   The 1 character military time zones were defined in a non-standard
+   way in [RFC0822] and are therefore unpredictable in their meaning.
+   The original definitions of the military zones "A" through "I" are
+   equivalent to "+0100" through "+0900", respectively; "K", "L", and
+   "M" are equivalent to "+1000", "+1100", and "+1200", respectively;
+   "N" through "Y" are equivalent to "-0100" through "-1200".
+   respectively; and "Z" is equivalent to "+0000".  However, because of
+   the error in [RFC0822], they SHOULD all be considered equivalent to
+   "-0000" unless there is out-of-band information confirming their
+   meaning.
+
+   1文字は、非標準的な使用のために[RFC0822]で軍用時間として定義されて
+   いるので、この意味は予測できない。軍用時間"A"～"I"の元々の定義は
+   "+0100"～"+0900"と同値で、"K", "L", "M"はそれぞれ"+1000", "+1100",
+   "+1200"と同値、"N"～"Y"は"-0100"～"-1200"と同値、"Z"は"+0000"と同値
+   であった。しかし、[RFC0822]の間違いにより、これらの意味を確認する帯
+   域外情報があるときを除き、これら全ては"-0000"と同値と考えるべきであ
+   る(SHOULD)。
+
+   Other multi-character (usually between 3 and 5) alphabetic time zones
+   have been used in Internet messages.  Any such time zone whose
+   meaning is not known SHOULD be considered equivalent to "-0000"
+   unless there is out-of-band information confirming their meaning.
+
+   他の複数文字(通常は3～5)のアルファベットのタイムゾーンはインターネッ
+   トメッセージで使われている。それらの意味を確認する帯域外情報がある
+   ときを除き、意味がわらない上記のタイムゾーンは、"-0000"と同値と考え
+   るべきである(SHOULD)。
+
+
+
+Resnick                     Standards Track                    [Page 34]
+
+RFC 5322                Internet Message Format             October 2008
+
+
+4.4.  Obsolete Addressing
+4.4.  廃止されたアドレス指定
+
+   There are four primary differences in addressing.  First, mailbox
+   addresses were allowed to have a route portion before the addr-spec
+   when enclosed in "<" and ">".  The route is simply a comma-separated
+   list of domain names, each preceded by "@", and the list terminated
+   by a colon.  Second, CFWS were allowed between the period-separated
+   elements of local-part and domain (i.e., dot-atom was not used).  In
+   addition, local-part is allowed to contain quoted-string in addition
+   to just atom.  Third, mailbox-list and address-list were allowed to
+   have "null" members.  That is, there could be two or more commas in
+   such a list with nothing in between them, or commas at the beginning
+   or end of the list.  Finally, US-ASCII control characters and quoted-
+   pairs were allowed in domain literals and are added here.
+
+   アドレス指定には4つの主な違いがある。1つ目は、メールボックスのアド
+   レスは"<"と">"で囲っているときにはaddr-specの前に経路の一部をもつこ
+   とができる。経路は単純なコンマ区切りのドメイン名のリストで、それぞ
+   れ"@"を前におき、リストはコロンで終わる。2つ目は、CFWSはピリオドで
+   区切られたlocal-partとドメイン部（すなわち、dot-atomは使わない）の
+   要素の間に置くことができる。加えて、local-partはアトムにだけ加えた
+   quoted-stringを含むことができる。3つ目は、mailbox-listと
+   address-listは"null"メンバーを持つことができる。つまり、そのような
+   リストには、間に何も無い2つ以上のコンマができたり、リストの始めや終
+   わりがコンマであったりできる。最後に、US-ASCIIコントロール文字と
+   quoted-pairはドメインリテラル内にあることができるし、ここに追加する
+   こともできる。
+
+   obs-angle-addr  =   [CFWS] "<" obs-route addr-spec ">" [CFWS]
+
+   obs-route       =   obs-domain-list ":"
+
+   obs-domain-list =   *(CFWS / ",") "@" domain
+                       *("," [CFWS] ["@" domain])
+
+   obs-mbox-list   =   *([CFWS] ",") mailbox *("," [mailbox / CFWS])
+
+   obs-addr-list   =   *([CFWS] ",") address *("," [address / CFWS])
+
+   obs-group-list  =   1*([CFWS] ",") [CFWS]
+
+   obs-local-part  =   word *("." word)
+
+   obs-domain      =   atom *("." atom)
+
+   obs-dtext       =   obs-NO-WS-CTL / quoted-pair
+
+   When interpreting addresses, the route portion SHOULD be ignored.
+
+   アドレスを解釈するときに、経路部分は無視するべきである(SHOULD)。
+
+
+4.5.  Obsolete Header Fields
+4.5.  廃止されたヘッダーフィールド
+
+   Syntactically, the primary difference in the obsolete field syntax is
+   that it allows multiple occurrences of any of the fields and they may
+   occur in any order.  Also, any amount of white space is allowed
+   before the ":" at the end of the field name.
+
+   構文的に、廃止された文法の主要な違いは、フィールドが多重発生が許さ
+   れており、どんな順序で現れてもよいということである。同様に、フィー
+   ルド名の終わりの":"の前に空白文字がどれだけ現れてもよい。
+
+
+
+
+
+
+
+Resnick                     Standards Track                    [Page 35]
+
+RFC 5322                Internet Message Format             October 2008
+
+
+   obs-fields      =   *(obs-return /
+                       obs-received /
+                       obs-orig-date /
+                       obs-from /
+                       obs-sender /
+                       obs-reply-to /
+                       obs-to /
+                       obs-cc /
+                       obs-bcc /
+                       obs-message-id /
+                       obs-in-reply-to /
+                       obs-references /
+                       obs-subject /
+                       obs-comments /
+                       obs-keywords /
+                       obs-resent-date /
+                       obs-resent-from /
+                       obs-resent-send /
+                       obs-resent-rply /
+                       obs-resent-to /
+                       obs-resent-cc /
+                       obs-resent-bcc /
+                       obs-resent-mid /
+                       obs-optional)
+
+   Except for destination address fields (described in section 4.5.3),
+   the interpretation of multiple occurrences of fields is unspecified.
+   Also, the interpretation of trace fields and resent fields that do
+   not occur in blocks prepended to the message is unspecified as well.
+   Unless otherwise noted in the following sections, interpretation of
+   other fields is identical to the interpretation of their non-obsolete
+   counterparts in section 3.
+
+   宛先アドレスフィールド（4.5.3章で述べる）を除き、フィールドの多重発
+   生の解釈は定義されていない。同様に、メッセージの先頭に追加されたブ
+   ロックには現れないトレースフィールドと再送フィールドの解釈も定義さ
+   れていない。以下の章で言及がない限り、他のフィールドの解釈は3章での
+   non-obsoleteの文法の解釈と同じである。
+
+4.5.1.  Obsolete Origination Date Field
+4.5.1.  廃止された送信日付フィールド
+
+   obs-orig-date   =   "Date" *WSP ":" date-time CRLF
+
+4.5.2.  Obsolete Originator Fields
+4.5.2.  廃止された送信元フィールド
+
+   obs-from        =   "From" *WSP ":" mailbox-list CRLF
+
+   obs-sender      =   "Sender" *WSP ":" mailbox CRLF
+
+   obs-reply-to    =   "Reply-To" *WSP ":" address-list CRLF
+
+
+
+
+
+
+
+Resnick                     Standards Track                    [Page 36]
+
+RFC 5322                Internet Message Format             October 2008
+
+
+4.5.3.  Obsolete Destination Address Fields
+4.5.3.  廃止された宛先アドレスフィールド
+
+   obs-to          =   "To" *WSP ":" address-list CRLF
+
+   obs-cc          =   "Cc" *WSP ":" address-list CRLF
+
+   obs-bcc         =   "Bcc" *WSP ":"
+                       (address-list / (*([CFWS] ",") [CFWS])) CRLF
+
+   When multiple occurrences of destination address fields occur in a
+   message, they SHOULD be treated as if the address list in the first
+   occurrence of the field is combined with the address lists of the
+   subsequent occurrences by adding a comma and concatenating.
+
+   メッセージで宛先アドレスフィールドの多重出現が起きた場合、フィール
+   ドの最初の出現のアドレスリストは、後に続くアドレスリストと、コンマ
+   が追加されて連結しているかのように処理すべきである(SHOULD)。
+
+4.5.4.  Obsolete Identification Fields
+4.5.4.  廃止された識別フィールド
+
+   The obsolete "In-Reply-To:" and "References:" fields differ from the
+   current syntax in that they allow phrase (words or quoted strings) to
+   appear.  The obsolete forms of the left and right sides of msg-id
+   allow interspersed CFWS, making them syntactically identical to
+   local-part and domain, respectively.
+
+   廃止された"In-Reply-To:"と"References:"フィールドは、それらを表示す
+   る際に許されている表現方法（単語、引用文字列）という点において、現
+   在の文法とは異なる。msg-idの左右の廃止された形式ではCFWSを撒き散ら
+   すことができ、それらは構文的にはそれぞれlocal-partとドメインと同じ
+   である。
+
+   obs-message-id  =   "Message-ID" *WSP ":" msg-id CRLF
+
+   obs-in-reply-to =   "In-Reply-To" *WSP ":" *(phrase / msg-id) CRLF
+
+   obs-references  =   "References" *WSP ":" *(phrase / msg-id) CRLF
+
+   obs-id-left     =   local-part
+
+   obs-id-right    =   domain
+
+   For purposes of interpretation, the phrases in the "In-Reply-To:" and
+   "References:" fields are ignored.
+
+   解釈目的のために、"In-Reply-To:"と"References:"フィールドでの表現は
+   無視する。
+
+   Semantically, none of the optional CFWS in the local-part and the
+   domain is part of the obs-id-left and obs-id-right, respectively.
+
+   local-partとドメインでのオプションのCFWSは、意味的に、それぞれ
+   obs-id-leftやobs-id-rightの一部ではない。
+
+4.5.5.  Obsolete Informational Fields
+4.5.5.  廃止された情報フィールド
+
+   obs-subject     =   "Subject" *WSP ":" unstructured CRLF
+
+   obs-comments    =   "Comments" *WSP ":" unstructured CRLF
+
+   obs-keywords    =   "Keywords" *WSP ":" obs-phrase-list CRLF
+
+
+
+
+
+
+Resnick                     Standards Track                    [Page 37]
+
+RFC 5322                Internet Message Format             October 2008
+
+
+4.5.6.  Obsolete Resent Fields
+4.5.6.  廃止された再送フィールド
+
+   The obsolete syntax adds a "Resent-Reply-To:" field, which consists
+   of the field name, the optional comments and folding white space, the
+   colon, and a comma separated list of addresses.
+
+   廃止された文法に、フィールド名、オプションでコメントと空白の折り返
+   し、コロン、コンマで区切られたアドレスのリストで構成される
+   "Resent-Reply-To:"フィールドを追加する。
+
+   obs-resent-from =   "Resent-From" *WSP ":" mailbox-list CRLF
+
+   obs-resent-send =   "Resent-Sender" *WSP ":" mailbox CRLF
+
+   obs-resent-date =   "Resent-Date" *WSP ":" date-time CRLF
+
+   obs-resent-to   =   "Resent-To" *WSP ":" address-list CRLF
+
+   obs-resent-cc   =   "Resent-Cc" *WSP ":" address-list CRLF
+
+   obs-resent-bcc  =   "Resent-Bcc" *WSP ":"
+                       (address-list / (*([CFWS] ",") [CFWS])) CRLF
+
+   obs-resent-mid  =   "Resent-Message-ID" *WSP ":" msg-id CRLF
+
+   obs-resent-rply =   "Resent-Reply-To" *WSP ":" address-list CRLF
+
+   As with other resent fields, the "Resent-Reply-To:" field is to be
+   treated as trace information only.
+
+   他の再送フィールドと同様に、"Resent-Reply-To:"フィールドはトレース
+   情報として処理されるだけである。
+
+4.5.7.  Obsolete Trace Fields
+4.5.7.  廃止されたトレースフィールド
+
+   The obs-return and obs-received are again given here as template
+   definitions, just as return and received are in section 3.  Their
+   full syntax is given in [RFC5321].
+
+   obs-returnとobs-receivedは、3章でのreturnとreceivedと同様に、テンプ
+   レートの定義のために再びここで与えられる。
+
+   obs-return      =   "Return-Path" *WSP ":" path CRLF
+
+   obs-received    =   "Received" *WSP ":" *received-token CRLF
+
+4.5.8.  Obsolete optional fields
+4.5.8.  廃止されたオプションフィールド
+
+   obs-optional    =   field-name *WSP ":" unstructured CRLF
+
+5.  Security Considerations
+5.  セキュリティ考察
+
+   Care needs to be taken when displaying messages on a terminal or
+   terminal emulator.  Powerful terminals may act on escape sequences
+   and other combinations of US-ASCII control characters with a variety
+   of consequences.  They can remap the keyboard or permit other
+   modifications to the terminal that could lead to denial of service or
+   even damaged data.  They can trigger (sometimes programmable)
+
+
+Resnick                     Standards Track                    [Page 38]
+
+RFC 5322                Internet Message Format             October 2008
+
+
+   answerback messages that can allow a message to cause commands to be
+   issued on the recipient's behalf.  They can also affect the operation
+   of terminal attached devices such as printers.  Message viewers may
+   wish to strip potentially dangerous terminal escape sequences from
+   the message prior to display.  However, other escape sequences appear
+   in messages for useful purposes (cf. [ISO.2022.1994], [RFC2045],
+   [RFC2046], [RFC2047], [RFC2049], [RFC4288], [RFC4289]) and therefore
+   should not be stripped indiscriminately.
+
+   端末や端末エミュレーターへのメッセージの表示の際には注意が必要であ
+   る。強力な端末はエスケープシーケンスや様々な結論をもったUS-ASCIIコ
+   ントロール文字の他の組み合わせに従って動作するだろう。それらはキー
+   ボードを再配置し、端末のためのほかの変更を許可でき、それは、サービ
+   スの拒否やデータの損傷にさえつながる。それらはメッセージが受信者の
+   利益に関する問題となるコマンドの原因になるアンサーバックメッセージ
+   の一因（時々、プログラム可能）となる。それらは、例えばプリンターの
+   ようなデバイスに取り付けられた端末の操作にも影響を及ぼす可能性があ
+   る。メッセージビューワーはメッセージからの潜在的に危険な端末エスケー
+   プシーケンスを表示する前に取り除きたいだろう。しかしながら、他のエ
+   スケープシーケンスは通常の目的でメッセージに現れるので
+   （[ISO.2022.1994], [RFC2045], [RFC2046], [RFC2047], [RFC2049],
+   [RFC4288], [RFC4289]参照）、見境なく取り除くべきではない。
+
+   Transmission of non-text objects in messages raises additional
+   security issues.  These issues are discussed in [RFC2045], [RFC2046],
+   [RFC2047], [RFC2049], [RFC4288], and [RFC4289].
+
+   メッセージ内での非テキストオブジェクトの送信は、付加的なセキュリティー
+   問題を起こす。それらの問題は[RFC2045], [RFC2046], [RFC2047],
+   [RFC2049], [RFC4288], [RFC4289]で議論されている。
+
+   Many implementations use the "Bcc:" (blind carbon copy) field,
+   described in section 3.6.3, to facilitate sending messages to
+   recipients without revealing the addresses of one or more of the
+   addressees to the other recipients.  Mishandling this use of "Bcc:"
+   may disclose confidential information that could eventually lead to
+   security problems through knowledge of even the existence of a
+   particular mail address.  For example, if using the first method
+   described in section 3.6.3, where the "Bcc:" line is removed from the
+   message, blind recipients have no explicit indication that they have
+   been sent a blind copy, except insofar as their address does not
+   appear in the header section of a message.  Because of this, one of
+   the blind addressees could potentially send a reply to all of the
+   shown recipients and accidentally reveal that the message went to the
+   blind recipient.  When the second method from section 3.6.3 is used,
+   the blind recipient's address appears in the "Bcc:" field of a
+   separate copy of the message.  If the "Bcc:" field sent contains all
+   of the blind addressees, all of the "Bcc:" recipients will be seen by
+   each "Bcc:" recipient.  Even if a separate message is sent to each
+   "Bcc:" recipient with only the individual's address, implementations
+   still need to be careful to process replies to the message as per
+   section 3.6.3 so as not to accidentally reveal the blind recipient to
+   other recipients.
+
+   多くの実装では、1つ以上のアドレスをほかの受信者へ明らかにせずに受信
+   者へメッセージを送信するのを容易にするために、3.6.3章で記述した
+   "Bcc:"(Blind Carbon Copy)フィールドを使う。"Bcc:"の取り扱いミスは、
+   秘密の情報をさらし、最終的には特定のメールアドレスの存在を知られる
+   ことによってセキュリティ問題を引き起こす可能性がある。例えば、3.6.3 
+   章で記述した最初の方法を使用していると、メッセージから"Bcc:"の行が
+   削除される場合、それらのアドレスがメッセージのヘッダーセクションに
+   現れない場合を除き、Bccの受信者にはブラインドコピーを送ったという明
+   白な表示はない。このために、Bccの受信者は返信を全ての表示されてる受
+   信者に送り、知らず知らずのうちに、メッセージをBccの受信者に送ったこ
+   とということを漏洩してしまう可能性がある。3.6.3章の2つ目のメソッド
+   を使うときは、隠された受信者のアドレスがメッセージの個々のコピーの
+   "Bcc:"フィールドに現れる。もし、"Bcc:"フィールドが全ての隠されたア
+   ドレスを含んで送信すると、全ての"Bcc:"受信者が各"Bcc:"受信者によっ
+   て見られるこのなるだろう。たとえ、個々のメッセージが各"Bcc:"受信者
+   に特定のアドレスだけと一緒に送られたとしても、実装は知らず知らずの
+   うちに隠された受信者を他の受信者に公開するといけないので、3.6.3章に
+   よってメッセージへの返信の処理には未だに気をつける必要がある。
+
+6.  IANA Considerations
+6.  IANA考察
+
+   This document updates the registrations that appeared in [RFC4021]
+   that referred to the definitions in [RFC2822].  IANA has updated the
+   Permanent Message Header Field Repository with the following header
+   fields, in accordance with the procedures set out in [RFC3864].
+
+   このドキュメントは[RFC2822]での定義を参照する[RFC4021]に現れた登録
+   を更新する。IANAは以下のヘッダーフィールドと一緒に、[RFC3864]での手
+   続きに従って、Permanent Message Header Field Repositoryを更新してい
+   る。
+
+   Header field name:  Date
+   Applicable protocol:  Mail
+   Status:  standard
+   Author/Change controller:  IETF
+   Specification document(s):  This document (section 3.6.1)
+
+   ヘッダーフィールド名: Date
+   適用可能プロトコル　: Mail
+   ステータス　　　　　: 標準
+   作者／編集者　　　　: IETF
+   仕様書　　　　　　　: 本書（3.6.1）
+
+
+Resnick                     Standards Track                    [Page 39]
+
+RFC 5322                Internet Message Format             October 2008
+
+
+   Header field name:  From
+   Applicable protocol:  Mail
+   Status:  standard
+   Author/Change controller:  IETF
+   Specification document(s):  This document (section 3.6.2)
+
+   ヘッダーフィールド名: From
+   適用可能プロトコル　: Mail
+   ステータス　　　　　: 標準
+   作者／編集者　　　　: IETF
+   仕様書　　　　　　　: 本書（3.6.2）
+
+   Header field name:  Sender
+   Applicable protocol:  Mail
+   Status:  standard
+   Author/Change controller:  IETF
+   Specification document(s):  This document (section 3.6.2)
+
+   ヘッダーフィールド名: Sender
+   適用可能プロトコル　: Mail
+   ステータス　　　　　: 標準
+   作者／編集者　　　　: IETF
+   仕様書　　　　　　　: 本書（3.6.2）
+
+   Header field name:  Reply-To
+   Applicable protocol:  Mail
+   Status:  standard
+   Author/Change controller:  IETF
+   Specification document(s):  This document (section 3.6.2)
+
+   ヘッダーフィールド名: Reply-To
+   適用可能プロトコル　: Mail
+   ステータス　　　　　: 標準
+   作者／編集者　　　　: IETF
+   仕様書　　　　　　　: 本書（3.6.2）
+
+   Header field name:  To
+   Applicable protocol:  Mail
+   Status:  standard
+   Author/Change controller:  IETF
+   Specification document(s):  This document (section 3.6.3)
+
+   ヘッダーフィールド名: To
+   適用可能プロトコル　: Mail
+   ステータス　　　　　: 標準
+   作者／編集者　　　　: IETF
+   仕様書　　　　　　　: 本書（3.6.3）
+
+   Header field name:  Cc
+   Applicable protocol:  Mail
+   Status:  standard
+   Author/Change controller:  IETF
+   Specification document(s):  This document (section 3.6.3)
+
+   ヘッダーフィールド名: Cc
+   適用可能プロトコル　: Mail
+   ステータス　　　　　: 標準
+   作者／編集者　　　　: IETF
+   仕様書　　　　　　　: 本書（3.6.3）
+
+   Header field name:  Bcc
+   Applicable protocol:  Mail
+   Status:  standard
+   Author/Change controller:  IETF
+   Specification document(s):  This document (section 3.6.3)
+
+   ヘッダーフィールド名: Bcc
+   適用可能プロトコル　: Mail
+   ステータス　　　　　: 標準
+   作者／編集者　　　　: IETF
+   仕様書　　　　　　　: 本書（3.6.3）
+
+   Header field name:  Message-ID
+   Applicable protocol:  Mail
+   Status:  standard
+   Author/Change controller:  IETF
+   Specification document(s):  This document (section 3.6.4)
+
+   ヘッダーフィールド名: Message-ID
+   適用可能プロトコル　: Mail
+   ステータス　　　　　: 標準
+   作者／編集者　　　　: IETF
+   仕様書　　　　　　　: 本書（3.6.4）
+
+   Header field name:  In-Reply-To
+   Applicable protocol:  Mail
+   Status:  standard
+   Author/Change controller:  IETF
+   Specification document(s):  This document (section 3.6.4)
+
+   ヘッダーフィールド名: In-Replay-To
+   適用可能プロトコル　: Mail
+   ステータス　　　　　: 標準
+   作者／編集者　　　　: IETF
+   仕様書　　　　　　　: 本書（3.6.4）
+
+
+
+
+Resnick                     Standards Track                    [Page 40]
+
+RFC 5322                Internet Message Format             October 2008
+
+
+   Header field name:  References
+   Applicable protocol:  Mail
+   Status:  standard
+   Author/Change controller:  IETF
+   Specification document(s):  This document (section 3.6.4)
+
+   ヘッダーフィールド名: References
+   適用可能プロトコル　: Mail
+   ステータス　　　　　: 標準
+   作者／編集者　　　　: IETF
+   仕様書　　　　　　　: 本書（3.6.4）
+
+   Header field name:  Subject
+   Applicable protocol:  Mail
+   Status:  standard
+   Author/Change controller:  IETF
+   Specification document(s):  This document (section 3.6.5)
+
+   ヘッダーフィールド名: Subject
+   適用可能プロトコル　: Mail
+   ステータス　　　　　: 標準
+   作者／編集者　　　　: IETF
+   仕様書　　　　　　　: 本書（3.6.5）
+
+   Header field name:  Comments
+   Applicable protocol:  Mail
+   Status:  standard
+   Author/Change controller:  IETF
+   Specification document(s):  This document (section 3.6.5)
+
+   ヘッダーフィールド名: Comments
+   適用可能プロトコル　: Mail
+   ステータス　　　　　: 標準
+   作者／編集者　　　　: IETF
+   仕様書　　　　　　　: 本書（3.6.5）
+
+   Header field name:  Keywords
+   Applicable protocol:  Mail
+   Status:  standard
+   Author/Change controller:  IETF
+   Specification document(s):  This document (section 3.6.5)
+
+   ヘッダーフィールド名: Keywords
+   適用可能プロトコル　: Mail
+   ステータス　　　　　: 標準
+   作者／編集者　　　　: IETF
+   仕様書　　　　　　　: 本書（3.6.5）
+
+   Header field name:  Resent-Date
+   Applicable protocol:  Mail
+   Status:  standard
+   Author/Change controller:  IETF
+   Specification document(s):  This document (section 3.6.6)
+
+   ヘッダーフィールド名: Resent-Date
+   適用可能プロトコル　: Mail
+   ステータス　　　　　: 標準
+   作者／編集者　　　　: IETF
+   仕様書　　　　　　　: 本書（3.6.6）
+
+   Header field name:  Resent-From
+   Applicable protocol:  Mail
+   Status:  standard
+   Author/Change controller:  IETF
+   Specification document(s):  This document (section 3.6.6)
+
+   ヘッダーフィールド名: Resent-From
+   適用可能プロトコル　: Mail
+   ステータス　　　　　: 標準
+   作者／編集者　　　　: IETF
+   仕様書　　　　　　　: 本書（3.6.6）
+
+   Header field name:  Resent-Sender
+   Applicable protocol:  Mail
+   Status:  standard
+   Author/Change controller:  IETF
+   Specification document(s):  This document (section 3.6.6)
+
+   ヘッダーフィールド名: Resent-Sender
+   適用可能プロトコル　: Mail
+   ステータス　　　　　: 標準
+   作者／編集者　　　　: IETF
+   仕様書　　　　　　　: 本書（3.6.6）
+
+   Header field name:  Resent-To
+   Applicable protocol:  Mail
+   Status:  standard
+   Author/Change controller:  IETF
+   Specification document(s):  This document (section 3.6.6)
+
+   ヘッダーフィールド名: Resent-To
+   適用可能プロトコル　: Mail
+   ステータス　　　　　: 標準
+   作者／編集者　　　　: IETF
+   仕様書　　　　　　　: 本書（3.6.6）
+
+
+
+
+Resnick                     Standards Track                    [Page 41]
+
+RFC 5322                Internet Message Format             October 2008
+
+
+   Header field name:  Resent-Cc
+   Applicable protocol:  Mail
+   Status:  standard
+   Author/Change controller:  IETF
+   Specification document(s):  This document (section 3.6.6)
+
+   ヘッダーフィールド名: Resent-Cc
+   適用可能プロトコル　: Mail
+   ステータス　　　　　: 標準
+   作者／編集者　　　　: IETF
+   仕様書　　　　　　　: 本書（3.6.6）
+
+   Header field name:  Resent-Bcc
+   Applicable protocol:  Mail
+   Status:  standard
+   Author/Change controller:  IETF
+   Specification document(s):  This document (section 3.6.6)
+
+   ヘッダーフィールド名: Resent-Bcc
+   適用可能プロトコル　: Mail
+   ステータス　　　　　: 標準
+   作者／編集者　　　　: IETF
+   仕様書　　　　　　　: 本書（3.6.6）
+
+   Header field name:  Resent-Reply-To
+   Applicable protocol:  Mail
+   Status:  obsolete
+   Author/Change controller:  IETF
+   Specification document(s):  This document (section 4.5.6)
+
+   ヘッダーフィールド名: Resent-Reply-To
+   適用可能プロトコル　: Mail
+   ステータス　　　　　: 廃止
+   作者／編集者　　　　: IETF
+   仕様書　　　　　　　: 本書（4.5.6）
+
+   Header field name:  Resent-Message-ID
+   Applicable protocol:  Mail
+   Status:  standard
+   Author/Change controller:  IETF
+   Specification document(s):  This document (section 3.6.6)
+
+   ヘッダーフィールド名: Resent-Messge-ID
+   適用可能プロトコル　: Mail
+   ステータス　　　　　: 標準
+   作者／編集者　　　　: IETF
+   仕様書　　　　　　　: 本書（3.6.6）
+
+   Header field name:  Return-Path
+   Applicable protocol:  Mail
+   Status:  standard
+   Author/Change controller:  IETF
+   Specification document(s):  This document (section 3.6.7)
+
+   ヘッダーフィールド名: Return-Path
+   適用可能プロトコル　: Mail
+   ステータス　　　　　: 標準
+   作者／編集者　　　　: IETF
+   仕様書　　　　　　　: 本書（3.6.7）
+
+   Header field name:  Received
+   Applicable protocol:  Mail
+   Status:  standard
+   Author/Change controller:  IETF
+   Specification document(s):  This document (section 3.6.7)
+   Related information:  [RFC5321]
+
+   ヘッダーフィールド名: Received
+   適用可能プロトコル　: Mail
+   ステータス　　　　　: 標準
+   作者／編集者　　　　: IETF
+   仕様書　　　　　　　: 本書（3.6.7）
+   関連情報　　　　　　: [RFC5321]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Resnick                     Standards Track                    [Page 42]
+
+RFC 5322                Internet Message Format             October 2008
+
+
+Appendix A.  Example Messages
+付録A.  メッセージの例
+
+   This section presents a selection of messages.  These are intended to
+   assist in the implementation of this specification, but should not be
+   taken as normative; that is to say, although the examples in this
+   section were carefully reviewed, if there happens to be a conflict
+   between these examples and the syntax described in sections 3 and 4
+   of this document, the syntax in those sections is to be taken as
+   correct.
+
+   この章ではメッセージの抽出について示す。これらはこの仕様の実装を手
+   助けすることを意図しているが、基準とすべきではない。つまり、この章
+   の例は注意して検査するが、もし、これらの例とこのドキュメントの3, 4 
+   章で記述した文法とが一致していなくても、各章の文法は正しい。
+
+   In the text version of this document, messages in this section are
+   delimited between lines of "----".  The "----" lines are not part of
+   the message itself.
+
+   このドキュメントのテキスト版では、このセクションのメッセージは
+   "----"の行で区切られている。"----"の行はメッセージ自身の一部ではな
+   い。
+
+
+
+
+
+
+
+
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Resnick                     Standards Track                    [Page 43]
+
+RFC 5322                Internet Message Format             October 2008
+
+
+Appendix A.1.  Addressing Examples
+付録A.1.  アドレス指定の例
+
+   The following are examples of messages that might be sent between two
+   individuals.
+
+   以下は2者間で送られたメッセージの例である。
+
+Appendix A.1.1.  A Message from One Person to Another with Simple
+                 Addressing
+付録A.1.1.  単純なアドレス指定による個人から他の個人へのメッセージ
+
+   This could be called a canonical message.  It has a single author,
+   John Doe, a single recipient, Mary Smith, a subject, the date, a
+   message identifier, and a textual message in the body.
+
+   これは標準的なメッセージと呼ばれるかもしれない。それは作成者がJohn
+   Doeで、受信者がMary Smithで、件名、日付、メッセージ識別子、本文には
+   原文のメッセージがある。
+
+   ----
+   From: John Doe <jdoe@machine.example>
+   To: Mary Smith <mary@example.net>
+   Subject: Saying Hello
+   Date: Fri, 21 Nov 1997 09:55:06 -0600
+   Message-ID: <1234@local.machine.example>
+
+   This is a message just to say hello.
+   So, "Hello".
+   ----
+
+   If John's secretary Michael actually sent the message, even though
+   John was the author and replies to this message should go back to
+   him, the sender field would be used:
+
+   もし、Johnの秘書Michaelが実際にメッセージを送信したのならば、たとえ
+   Johnが作成者で、このメッセージへの返信が彼に返されるべきだったとし
+   ても、送信者フィールドは以下のように使われるだろう。
+
+   ----
+   From: John Doe <jdoe@machine.example>
+   Sender: Michael Jones <mjones@machine.example>
+   To: Mary Smith <mary@example.net>
+   Subject: Saying Hello
+   Date: Fri, 21 Nov 1997 09:55:06 -0600
+   Message-ID: <1234@local.machine.example>
+
+   This is a message just to say hello.
+   So, "Hello".
+   ----
+
+
+
+
+
+
+
+
+
+
+
+
+
+Resnick                     Standards Track                    [Page 44]
+
+RFC 5322                Internet Message Format             October 2008
+
+
+Appendix A.1.2.  Different Types of Mailboxes
+付録A.1.2.  異なる種類のメールボックス
+
+   This message includes multiple addresses in the destination fields
+   and also uses several different forms of addresses.
+
+   このメッセージは宛先フィールドに複数のアドレスを含み、アドレスの形
+   式に複数の異なったものを使う。
+
+   ----
+   From: "Joe Q. Public" <john.q.public@example.com>
+   To: Mary Smith <mary@x.test>, jdoe@example.org, Who? <one@y.test>
+   Cc: <boss@nil.test>, "Giant; \"Big\" Box" <sysservices@example.net>
+   Date: Tue, 1 Jul 2003 10:52:37 +0200
+   Message-ID: <5678.21-Nov-1997@example.com>
+
+   Hi everyone.
+   ----
+
+   Note that the display names for Joe Q. Public and Giant; "Big" Box
+   needed to be enclosed in double-quotes because the former contains
+   the period and the latter contains both semicolon and double-quote
+   characters (the double-quote characters appearing as quoted-pair
+   constructs).  Conversely, the display name for Who? could appear
+   without them because the question mark is legal in an atom.  Notice
+   also that jdoe@example.org and boss@nil.test have no display names
+   associated with them at all, and jdoe@example.org uses the simpler
+   address form without the angle brackets.
+
+   Joe Q. PublicとGiant; "Big" Boxの表示名は、前者はピリオドを含んでお
+   り、後者はセミコロンとダブルクオート文字（ダブルクオート文字は
+   quoted-pair構造として表示される）を含んでいるので、ダブルクオートで
+   囲む必要がある、ということに注意されたし。反対に、Who?の表示名は、
+   クエスチョン・マークがアトム内で仕様に従っているのでダブルクオート
+   なしで表示できる。jdoe@example.orgとboss@nil.testは、それらに関連す
+   る表示名を持っておらず、jdoe@example.orgは山括弧のない単なるアドレ
+   ス形式を使っている、ということにも気を付けられたし。
+
+Appendix A.1.3.  Group Addresses
+付録A.1.3.  グループアドレス
+
+   ----
+   From: Pete <pete@silly.example>
+   To: A Group:Ed Jones <c@a.test>,joe@where.test,John <jdoe@one.test>;
+   Cc: Undisclosed recipients:;
+   Date: Thu, 13 Feb 1969 23:32:54 -0330
+   Message-ID: <testabcd.1234@silly.example>
+
+   Testing.
+   ----
+
+   In this message, the "To:" field has a single group recipient named
+   "A Group", which contains 3 addresses, and a "Cc:" field with an
+   empty group recipient named Undisclosed recipients.
+
+   このメッセージでは、"To:"フィールドが"A Group"という名前の3つのアド
+   レスを含む単一のグループ受信者をもっており、Undisclosed recipients 
+   という名前の空のグループ受信者をもった"Cc:"フィールドを含む。
+
+
+
+
+
+
+
+
+
+Resnick                     Standards Track                    [Page 45]
+
+RFC 5322                Internet Message Format             October 2008
+
+
+Appendix A.2.  Reply Messages
+付録A.2.  返信メッセージ
+
+   The following is a series of three messages that make up a
+   conversation thread between John and Mary.  John first sends a
+   message to Mary, Mary then replies to John's message, and then John
+   replies to Mary's reply message.
+
+   以下はJohnとMaryの間の会話のスレッドを作る一連の3つのメッセージであ
+   る。Johnが始めにメッセージをMaryに送り、MaryはJohnのメッセージに返
+   信をし、JohnがMeryの返信メッセージに返信をする。
+
+   Note especially the "Message-ID:", "References:", and "In-Reply-To:"
+   fields in each message.
+
+   特に各メッセージの"Message-ID:", "References:", "In-Reply-To:"フィー
+   ルドに注意されたし。
+
+   ----
+   From: John Doe <jdoe@machine.example>
+   To: Mary Smith <mary@example.net>
+   Subject: Saying Hello
+   Date: Fri, 21 Nov 1997 09:55:06 -0600
+   Message-ID: <1234@local.machine.example>
+
+   This is a message just to say hello.
+   So, "Hello".
+   ----
+
+   When sending replies, the Subject field is often retained, though
+   prepended with "Re: " as described in section 3.6.5.
+
+   返信を送るときには、件名フィールドは、3.6.5章で記述したように先頭に
+   "Re:"が追加されるが、多くの場合保持される。
+
+   ----
+   From: Mary Smith <mary@example.net>
+   To: John Doe <jdoe@machine.example>
+   Reply-To: "Mary Smith: Personal Account" <smith@home.example>
+   Subject: Re: Saying Hello
+   Date: Fri, 21 Nov 1997 10:01:10 -0600
+   Message-ID: <3456@example.net>
+   In-Reply-To: <1234@local.machine.example>
+   References: <1234@local.machine.example>
+
+   This is a reply to your hello.
+   ----
+
+   Note the "Reply-To:" field in the above message.  When John replies
+   to Mary's message above, the reply should go to the address in the
+   "Reply-To:" field instead of the address in the "From:" field.
+
+   上記のメッセージの"Reply-To:"フィールドに注意されたし。Johnが上で
+   Maryのメッセージに返信したとき、返信は"From:"フィールドのアドレスの
+   代わりに"Reply-To:"フィールドのアドレスに返信されるべきである。
+
+
+
+
+
+
+
+
+
+Resnick                     Standards Track                    [Page 46]
+
+RFC 5322                Internet Message Format             October 2008
+
+
+   ----
+   To: "Mary Smith: Personal Account" <smith@home.example>
+   From: John Doe <jdoe@machine.example>
+   Subject: Re: Saying Hello
+   Date: Fri, 21 Nov 1997 11:00:00 -0600
+   Message-ID: <abcd.1234@local.machine.test>
+   In-Reply-To: <3456@example.net>
+   References: <1234@local.machine.example> <3456@example.net>
+
+   This is a reply to your reply.
+   ----
+
+Appendix A.3.  Resent Messages
+付録A.3.  再送メッセージ
+
+   Start with the message that has been used as an example several
+   times:
+
+   例で数回使用されてきたメッセージから始める。
+
+   ----
+   From: John Doe <jdoe@machine.example>
+   To: Mary Smith <mary@example.net>
+   Subject: Saying Hello
+   Date: Fri, 21 Nov 1997 09:55:06 -0600
+   Message-ID: <1234@local.machine.example>
+
+   This is a message just to say hello.
+   So, "Hello".
+   ----
+
+   Say that Mary, upon receiving this message, wishes to send a copy of
+   the message to Jane such that (a) the message would appear to have
+   come straight from John; (b) if Jane replies to the message, the
+   reply should go back to John; and (c) all of the original
+   information, like the date the message was originally sent to Mary,
+   the message identifier, and the original addressee, is preserved.  In
+   this case, resent fields are prepended to the message:
+
+   Maryが、このメッセージの受け取りに関して、メッセージのコピーをJane 
+   に送りたいと言った場合、以下のようにする。(a)メッセージはJohnから直
+   接来たと表示し、(b)もし、Janeがメッセージに返信するときは、返信は
+   Johnに戻すべきで、(c)メッセージが元々Maryに送られた日付、メッセージ
+   識別子、元の受信者、というような全ての元の情報は保持する。この場合、
+   再送フィールドはメッセージの先頭に追加される。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Resnick                     Standards Track                    [Page 47]
+
+RFC 5322                Internet Message Format             October 2008
+
+
+   ----
+   Resent-From: Mary Smith <mary@example.net>
+   Resent-To: Jane Brown <j-brown@other.example>
+   Resent-Date: Mon, 24 Nov 1997 14:22:01 -0800
+   Resent-Message-ID: <78910@example.net>
+   From: John Doe <jdoe@machine.example>
+   To: Mary Smith <mary@example.net>
+   Subject: Saying Hello
+   Date: Fri, 21 Nov 1997 09:55:06 -0600
+   Message-ID: <1234@local.machine.example>
+
+   This is a message just to say hello.
+   So, "Hello".
+   ----
+
+   If Jane, in turn, wished to resend this message to another person,
+   she would prepend her own set of resent header fields to the above
+   and send that.  (Note that for brevity, trace fields are not shown.)
+
+   もしJaneが、順に、このメッセージを他の人に再送したい場合、彼女は彼
+   女自身の再送フィールドのセットを先頭に追加し、送信する。（簡単にす
+   るために、トレースフィールドは表示していない。）
+
+Appendix A.4.  Messages with Trace Fields
+付録A.4.  トレースフィールド付きメッセージ
+
+   As messages are sent through the transport system as described in
+   [RFC5321], trace fields are prepended to the message.  The following
+   is an example of what those trace fields might look like.  Note that
+   there is some folding white space in the first one since these lines
+   can be long.
+
+   [RFC5321]で記述されてるように、メッセージが配送システムを通して送信
+   されたとき、トレースフィールドはメッセージの先頭に追加される。以下
+   は、そのようなトレースフィールドの例である。これらの行は長くなりそ
+   うなので、初めの１つには空白の折り返しがあることがあることに注意す
+   る。
+
+   ----
+   Received: from x.y.test
+      by example.net
+      via TCP
+      with ESMTP
+      id ABC12345
+      for <mary@example.net>;  21 Nov 1997 10:05:43 -0600
+   Received: from node.example by x.y.test; 21 Nov 1997 10:01:22 -0600
+   From: John Doe <jdoe@node.example>
+   To: Mary Smith <mary@example.net>
+   Subject: Saying Hello
+   Date: Fri, 21 Nov 1997 09:55:06 -0600
+   Message-ID: <1234@local.node.example>
+
+   This is a message just to say hello.
+   So, "Hello".
+   ----
+
+
+
+
+
+
+
+Resnick                     Standards Track                    [Page 48]
+
+RFC 5322                Internet Message Format             October 2008
+
+
+Appendix A.5.  White Space, Comments, and Other Oddities
+付録A.5.  空白文字、コメント、その他変なもの
+
+   White space, including folding white space, and comments can be
+   inserted between many of the tokens of fields.  Taking the example
+   from A.1.3, white space and comments can be inserted into all of the
+   fields.
+
+   空白文字、空白の折り返し、コメントは多くのフィールドのトークンの間
+   に挿入することができる。A.1.3章の例には、空白文字とコメントを全ての
+   フィールドに挿入することができる。
+
+   ----
+   From: Pete(A nice \) chap) <pete(his account)@silly.test(his host)>
+   To:A Group(Some people)
+        :Chris Jones <c@(Chris's host.)public.example>,
+            joe@example.org,
+     John <jdoe@one.test> (my dear friend); (the end of the group)
+   Cc:(Empty list)(start)Hidden recipients  :(nobody(that I know))  ;
+   Date: Thu,
+         13
+           Feb
+             1969
+         23:32
+                  -0330 (Newfoundland Time)
+   Message-ID:              <testabcd.1234@silly.test>
+
+   Testing.
+   ----
+
+   The above example is aesthetically displeasing, but perfectly legal.
+   Note particularly (1) the comments in the "From:" field (including
+   one that has a ")" character appearing as part of a quoted-pair); (2)
+   the white space absent after the ":" in the "To:" field as well as
+   the comment and folding white space after the group name, the special
+   character (".") in the comment in Chris Jones's address, and the
+   folding white space before and after "joe@example.org,"; (3) the
+   multiple and nested comments in the "Cc:" field as well as the
+   comment immediately following the ":" after "Cc"; (4) the folding
+   white space (but no comments except at the end) and the missing
+   seconds in the time of the date field; and (5) the white space before
+   (but not within) the identifier in the "Message-ID:" field.
+
+   上記の例は芸術的なまでに美しくないが、完全に仕様に従っている。特に
+   以下のことに注意していただきたい。(1)"From:"フィールド（quoted-pair 
+   の一部として表示されている")"文字を含む）のコメント、(2)"To:"フィー
+   ルドの":"の後に空白文字がないことのほかに、グループ名の後のコメント
+   と空白の折り返し、Chris Joneのアドレスのコメントにある特殊文字(".")、
+   "joe@example.org,"の前後にある空白の折り返し、(3)"Cc:"フィールドの
+   多重やネストしたコメントのほかに、"Cc"の後の":"にすぐに続くコメント、
+   (4)空白の折り返し（しかし、最後にあるコメントは除く）と日付フィール
+   ドの時間の2番目の欠如、それと、(5)"Message-ID:"フィールドの識別子の
+   前の空白文字である。
+
+
+
+
+
+
+
+
+
+
+
+
+Resnick                     Standards Track                    [Page 49]
+
+RFC 5322                Internet Message Format             October 2008
+
+
+Appendix A.6.  Obsoleted Forms
+付録A.6.  廃止された形式
+
+   The following are examples of obsolete (that is, the "MUST NOT
+   generate") syntactic elements described in section 4 of this
+   document.
+
+   以下はこのドキュメントの4章で記述した廃止された（つまり、"生成して
+   はならない(MUST NOT)"）文法要素の例である。
+
+Appendix A.6.1.  Obsolete Addressing
+付録A.6.1.  アドレス指定の廃止
+
+   Note in the example below the lack of quotes around Joe Q. Public,
+   the route that appears in the address for Mary Smith, the two commas
+   that appear in the "To:" field, and the spaces that appear around the
+   "." in the jdoe address.
+
+   以下の例、Joe Q. Publicの周りの引用符の欠如、Mary Smithのアドレスの
+   経路、"To:"フィールドの2つのコンマ、jdoeアドレスの"."の周りの空白、
+   に注意する。
+
+   ----
+   From: Joe Q. Public <john.q.public@example.com>
+   To: Mary Smith <@node.test:mary@example.net>, , jdoe@test  . example
+   Date: Tue, 1 Jul 2003 10:52:37 +0200
+   Message-ID: <5678.21-Nov-1997@example.com>
+
+   Hi everyone.
+   ----
+
+Appendix A.6.2.  Obsolete Dates
+付録A.6.2.  日付の廃止
+
+   The following message uses an obsolete date format, including a non-
+   numeric time zone and a two digit year.  Note that although the day-
+   of-week is missing, that is not specific to the obsolete syntax; it
+   is optional in the current syntax as well.
+
+   以下のメッセージは、非数値タイムゾーンや2桁の年を含む、廃止された日
+   付フォーマットを使用している。day-of-weekがないことに注意していただ
+   きたいが、それは廃止された文法では仕様が定義されていないからである。
+   おまけに、現在の文法ではオプションである。
+
+   ----
+   From: John Doe <jdoe@machine.example>
+   To: Mary Smith <mary@example.net>
+   Subject: Saying Hello
+   Date: 21 Nov 97 09:55:06 GMT
+   Message-ID: <1234@local.machine.example>
+
+   This is a message just to say hello.
+   So, "Hello".
+   ----
+
+
+
+
+
+
+
+
+
+
+
+
+Resnick                     Standards Track                    [Page 50]
+
+RFC 5322                Internet Message Format             October 2008
+
+
+Appendix A.6.3.  Obsolete White Space and Comments
+付録A.6.3.  空白文字とコメントの廃止
+
+   White space and comments can appear between many more elements than
+   in the current syntax.  Also, folding lines that are made up entirely
+   of white space are legal.
+
+   空白文字とコメントは現在の文法より多くの要素の間に表示できる。同様
+   に、全て空白文字で構成された行の折り返しも仕様に従っている。
+
+   ----
+   From  : John Doe <jdoe@machine(comment).  example>
+   To    : Mary Smith
+   __
+             <mary@example.net>
+   Subject     : Saying Hello
+   Date  : Fri, 21 Nov 1997 09(comment):   55  :  06 -0600
+   Message-ID  : <1234   @   local(blah)  .machine .example>
+
+   This is a message just to say hello.
+   So, "Hello".
+   ----
+
+   Note especially the second line of the "To:" field.  It starts with
+   two space characters.  (Note that "__" represent blank spaces.)
+   Therefore, it is considered part of the folding, as described in
+   section 4.2.  Also, the comments and white space throughout
+   addresses, dates, and message identifiers are all part of the
+   obsolete syntax.
+
+
+   特に"To:"フィールドの2行目に注意してほしい。2個の空白文字で始まって
+   いる。（"__"は空欄を表す。）よって、4.2章で記述したように、折り返し
+   部分が考えられる。同様に、アドレス、日付、メッセージ識別子のコメン
+   トや空白文字は全て廃止された文法の一部である。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Resnick                     Standards Track                    [Page 51]
+
+RFC 5322                Internet Message Format             October 2008
+
+
+Appendix B.  Differences from Earlier Specifications
+付録B.  以前の仕様との違い
+
+   This appendix contains a list of changes that have been made in the
+   Internet Message Format from earlier specifications, specifically
+   [RFC0822], [RFC1123], and [RFC2822].  Items marked with an asterisk
+   (*) below are items which appear in section 4 of this document and
+   therefore can no longer be generated.
+
+   この付録は、インターネットメッセージ形式の前のバージョン、特に
+   [RFC0822], [RFC1123], [RFC2822]からの変更のリストを含んでいる。以下
+   のアスタリスク(*)の付いたものは、このドキュメントの4章で示したので、
+   もはや生成できないものである。
+
+   The following are the changes made from [RFC0822] and [RFC1123] to
+   [RFC2822] that remain in this document:
+
+   以下はこのドキュメントで残っている[RFC0822]と[RFC1123]～[RFC2822]か
+   らの変更点である。
+
+   1.   Period allowed in obsolete form of phrase.
+   2.   ABNF moved out of document, now in [RFC5234].
+   3.   Four or more digits allowed for year.
+   4.   Header field ordering (and lack thereof) made explicit.
+   5.   Encrypted header field removed.
+   6.   Specifically allow and give meaning to "-0000" time zone.
+   7.   Folding white space is not allowed between every token.
+   8.   Requirement for destinations removed.
+   9.   Forwarding and resending redefined.
+   10.  Extension header fields no longer specifically called out.
+   11.  ASCII 0 (null) removed.*
+   12.  Folding continuation lines cannot contain only white space.*
+   13.  Free insertion of comments not allowed in date.*
+   14.  Non-numeric time zones not allowed.*
+   15.  Two digit years not allowed.*
+   16.  Three digit years interpreted, but not allowed for generation.*
+   17.  Routes in addresses not allowed.*
+   18.  CFWS within local-parts and domains not allowed.*
+   19.  Empty members of address lists not allowed.*
+   20.  Folding white space between field name and colon not allowed.*
+   21.  Comments between field name and colon not allowed.
+   22.  Tightened syntax of in-reply-to and references.*
+   23.  CFWS within msg-id not allowed.*
+   24.  Tightened semantics of resent fields as informational only.
+   25.  Resent-Reply-To not allowed.*
+   26.  No multiple occurrences of fields (except resent and received).*
+   27.  Free CR and LF not allowed.*
+   28.  Line length limits specified.
+   29.  Bcc more clearly specified.
+
+    1.  ピリオドは廃止された表現形式で許可。
+    2.  ABNFはこのドキュメントから除かれた、現在は[RFC5234]にある。
+    3.  年には4桁以上を許可。
+    4.  ヘッダーフィールドの順序付け（とそれの欠如）が明確化。
+    5.  暗号化ヘッダーフィールドを削除。
+    6.  具体的に"-0000"タイムゾーンを許可し、意味を与える。
+    7.  空白の折り返しはトークン間では不許可。
+    8.  宛先が必須というのは削除。
+    9.  転送と再送が再定義。
+   10.  拡張ヘッダーフィールドはもはや特に使われない。
+   11.  ASCII 0 (null)は削除。*
+   12.  折り返しが続く行には空白文字のみの行は含まない。*
+   13.  コメントの自由な挿入は日付には不許可。*
+   14.  非数値タイムゾーンは不許可。*
+   15.  2桁の年は不許可。*
+   16.  3桁の年は解釈されるが、生成は不許可。*
+   17.  アドレス内の経路は不許可。*
+   18.  local-partとドメイン内のCFWSは不許可。*
+   19.  アドレスリストの空メンバーは不許可。*
+   20.  フィールド名とコロンの間の空白の折り返しは不許可。*
+   21.  フィールド名とコロンの間のコメントは不許可。
+   22.  in-reply-toの文法を厳しくし、参照する。*
+   23.  msg-id内のCFWSは不許可。*
+   24.  情報のみとして再送フィールドの意味論を厳しく。
+   25.  Resent-Reply-Toは不許可。*
+   26.  フィールドの多重出現はない（再送、返信は除く）。*
+   27.  自由なCR, LFは不許可。*
+   28.  行の長さの限界を定義。
+   29.  Bccがより明確に定義。
+
+
+
+
+
+
+Resnick                     Standards Track                    [Page 52]
+
+RFC 5322                Internet Message Format             October 2008
+
+
+   The following are changes from [RFC2822].
+
+以下は[RFC2822]からの変更点である。
+
+   1.   Assorted typographical/grammatical errors fixed and
+        clarifications made.
+   2.   Changed "standard" to "document" or "specification" throughout.
+   3.   Made distinction between "header field" and "header section".
+   4.   Removed NO-WS-CTL from ctext, qtext, dtext, and unstructured.*
+   5.   Moved discussion of specials to the "Atom" section.  Moved text
+        to "Overall message syntax" section.
+   6.   Simplified CFWS syntax.
+   7.   Fixed unstructured syntax.
+   8.   Changed date and time syntax to deal with white space in
+        obsolete date syntax.
+   9.   Removed quoted-pair from domain literals and message
+        identifiers.*
+   10.  Clarified that other specifications limit domain syntax.
+   11.  Simplified "Bcc:" and "Resent-Bcc:" syntax.
+   12.  Allowed optional-field to appear within trace information.
+   13.  Removed no-fold-quote from msg-id.  Clarified syntax
+        limitations.
+   14.  Generalized "Received:" syntax to fix bugs and move definition
+        out of this document.
+   15.  Simplified obs-qp.  Fixed and simplified obs-utext (which now
+        only appears in the obsolete syntax).  Removed obs-text and obs-
+        char, adding obs-body.
+   16.  Fixed obsolete date syntax to allow for more (or less) comments
+        and white space.
+   17.  Fixed all obsolete list syntax (obs-domain-list, obs-mbox-list,
+        obs-addr-list, obs-phrase-list, and the newly added obs-group-
+        list).
+   18.  Fixed obs-reply-to syntax.
+   19.  Fixed obs-bcc and obs-resent-bcc to allow empty lists.
+   20.  Removed obs-path.
+
+    1.  同じ印刷ミス／文法的誤りを修正し、釈明を作成。
+    2.  "標準(standard)"を全て"文書(document)"か"仕様書
+        (specification)"に変更。
+    3.  "ヘッダーフィールド"と"ヘッダーセクション"を区別。
+    4.  ctext, qtext, dtextからのNO-WS-CTLを削除し、非構造化。*
+    5.  特殊文字の議論を"アトム"の章へ移動。テキストの議論を"メッセー
+        ジ全体の文法"の章へ移動。
+    6.  CFWS文法を簡易化。
+    7.  非構造化文法を修正。
+    8.  日付・時間の文法を廃止された日付の文法での空白文字と一緒に詳細
+        なものへ変更。
+    9.  ドメインとメッセージ識別子からのquoted-pairを削除。
+   10.  他の仕様がドメインの文法を制限するのを明確化。
+   11.  "Bcc:"と"Resent-Bcc:"の文法を簡略化。
+   12.  optional-fieldがトレース情報で表示されるのを許可。
+   13.  msg-idから折りno-fold-quoteを削除。文法の限界を明確化。
+   14.  バグを修正するために"Received:"の文法を一般化し定義をこのドキュ
+        メント外に移動。
+   15.  obs-qpを簡略化。obs-utextを修正し簡略化（現在は廃止された文法
+        として登場するのみ）。obs-textとobs-charを削除し、obs-bodyを追
+        加。
+   16.  より多くの（少ない）コメントや空白文字を許可するために廃止され
+        た日付の文法を修正。
+   17.  全ての廃止されたリスト（obs-domain-list, obs-mbox-list,
+        obs-addr-list, obs-phrase-list, と新たに追加された
+        obs-group-list）の文法を修正。
+   18.  obs-reply-to文法を修正。
+   19.  空リストを許可するためにobs-bccとobs-resent-bccの文法を修正
+   20.  obs-pathを削除。
+
+
+
+Appendix C.  Acknowledgements
+付録C.  謝辞
+
+   Many people contributed to this document.  They included folks who
+   participated in the Detailed Revision and Update of Messaging
+   Standards (DRUMS) Working Group of the Internet Engineering Task
+   Force (IETF), the chair of DRUMS, the Area Directors of the IETF, and
+   people who simply sent their comments in via email.  The editor is
+   deeply indebted to them all and thanks them sincerely.  The below
+   list includes everyone who sent email concerning both this document
+   and [RFC2822].  Hopefully, everyone who contributed is named here:
+
+   多くの人が本仕様書に貢献してくれました。彼らには、the Internet
+   Engineering Task Force (IETF)のDetailed Revision and update of
+   Messaging Standards (DRUMS) Working Groupに参加している人々、DRUMS
+   の議長、IETFのArea Director、単にメールを介してコメントと送ってくれ
+   た人々も含む。編集者は彼ら全員に深く恩義があり、彼らに心から感謝し
+   ます。以下のリストは、本仕様書と[RFC2822]両方に関連するメールを送っ
+   た全員です。
+
+
+   +--------------------+----------------------+---------------------+
+   | Matti Aarnio       | Tanaka Akira         | Russ Allbery        |
+   | Eric Allman        | Harald Alvestrand    | Ran Atkinson        |
+   | Jos Backus         | Bruce Balden         | Dave Barr           |
+
+
+
+Resnick                     Standards Track                    [Page 53]
+
+RFC 5322                Internet Message Format             October 2008
+
+
+   | Alan Barrett       | John Beck            | J Robert von Behren |
+   | Jos den Bekker     | D J Bernstein        | James Berriman      |
+   | Oliver Block       | Norbert Bollow       | Raj Bose            |
+   | Antony Bowesman    | Scott Bradner        | Randy Bush          |
+   | Tom Byrer          | Bruce Campbell       | Larry Campbell      |
+   | W J Carpenter      | Michael Chapman      | Richard Clayton     |
+   | Maurizio Codogno   | Jim Conklin          | R Kelley Cook       |
+   | Nathan Coulter     | Steve Coya           | Mark Crispin        |
+   | Dave Crocker       | Matt Curtin          | Michael D'Errico    |
+   | Cyrus Daboo        | Michael D Dean       | Jutta Degener       |
+   | Mark Delany        | Steve Dorner         | Harold A Driscoll   |
+   | Michael Elkins     | Frank Ellerman       | Robert Elz          |
+   | Johnny Eriksson    | Erik E Fair          | Roger Fajman        |
+   | Patrik Faltstrom   | Claus Andre Faerber  | Barry Finkel        |
+   | Erik Forsberg      | Chuck Foster         | Paul Fox            |
+   | Klaus M Frank      | Ned Freed            | Jochen Friedrich    |
+   | Randall C Gellens  | Sukvinder Singh Gill | Tim Goodwin         |
+   | Philip Guenther    | Arnt Gulbrandsen     | Eric A Hall         |
+   | Tony Hansen        | John Hawkinson       | Philip Hazel        |
+   | Kai Henningsen     | Robert Herriot       | Paul Hethmon        |
+   | Jim Hill           | Alfred Hoenes        | Paul E Hoffman      |
+   | Steve Hole         | Kari Hurtta          | Marco S Hyman       |
+   | Ofer Inbar         | Olle Jarnefors       | Kevin Johnson       |
+   | Sudish Joseph      | Maynard Kang         | Prabhat Keni        |
+   | John C Klensin     | Graham Klyne         | Brad Knowles        |
+   | Shuhei Kobayashi   | Peter Koch           | Dan Kohn            |
+   | Christian Kuhtz    | Anand Kumria         | Steen Larsen        |
+   | Eliot Lear         | Barry Leiba          | Jay Levitt          |
+   | Bruce Lilly        | Lars-Johan Liman     | Charles Lindsey     |
+   | Pete Loshin        | Simon Lyall          | Bill Manning        |
+   | John Martin        | Mark Martinec        | Larry Masinter      |
+   | Denis McKeon       | William P McQuillan  | Alexey Melnikov     |
+   | Perry E Metzger    | Steven Miller        | S Moonesamy         |
+   | Keith Moore        | John Gardiner Myers  | Chris Newman        |
+   | John W Noerenberg  | Eric Norman          | Mike O'Dell         |
+   | Larry Osterman     | Paul Overell         | Jacob Palme         |
+   | Michael A Patton   | Uzi Paz              | Michael A Quinlan   |
+   | Robert Rapplean    | Eric S Raymond       | Sam Roberts         |
+   | Hugh Sasse         | Bart Schaefer        | Tom Scola           |
+   | Wolfgang Segmuller | Nick Shelness        | John Stanley        |
+   | Einar Stefferud    | Jeff Stephenson      | Bernard Stern       |
+   | Peter Sylvester    | Mark Symons          | Eric Thomas         |
+   | Lee Thompson       | Karel De Vriendt     | Matthew Wall        |
+   | Rolf Weber         | Brent B Welch        | Dan Wing            |
+   | Jack De Winter     | Gregory J Woodhouse  | Greg A Woods        |
+   | Kazu Yamamoto      | Alain Zahm           | Jamie Zawinski      |
+   | Timothy S Zurcher  |                      |                     |
+   +--------------------+----------------------+---------------------+
+
+
+
+Resnick                     Standards Track                    [Page 54]
+
+RFC 5322                Internet Message Format             October 2008
+
+
+7.  References
+7.  参考文献
+
+7.1.  Normative References
+7.1.  標準的な参考文献
+
+   [ANSI.X3-4.1986]  American National Standards Institute, "Coded
+                     Character Set - 7-bit American Standard Code for
+                     Information Interchange", ANSI X3.4, 1986.
+
+   [RFC1034]         Mockapetris, P., "Domain names - concepts and
+                     facilities", STD 13, RFC 1034, November 1987.
+
+   [RFC1035]         Mockapetris, P., "Domain names - implementation and
+                     specification", STD 13, RFC 1035, November 1987.
+
+   [RFC1123]         Braden, R., "Requirements for Internet Hosts -
+                     Application and Support", STD 3, RFC 1123,
+                     October 1989.
+
+   [RFC2119]         Bradner, S., "Key words for use in RFCs to Indicate
+                     Requirement Levels", BCP 14, RFC 2119, March 1997.
+
+   [RFC5234]         Crocker, D. and P. Overell, "Augmented BNF for
+                     Syntax Specifications: ABNF", STD 68, RFC 5234,
+                     January 2008.
+
+7.2.  Informative References
+7.2.  有益な参考文献
+
+   [RFC0822]         Crocker, D., "Standard for the format of ARPA
+                     Internet text messages", STD 11, RFC 822,
+                     August 1982.
+
+   [RFC1305]         Mills, D., "Network Time Protocol (Version 3)
+                     Specification, Implementation", RFC 1305,
+                     March 1992.
+
+   [ISO.2022.1994]   International Organization for Standardization,
+                     "Information technology - Character code structure
+                     and extension techniques", ISO Standard 2022, 1994.
+
+   [RFC2045]         Freed, N. and N. Borenstein, "Multipurpose Internet
+                     Mail Extensions (MIME) Part One: Format of Internet
+                     Message Bodies", RFC 2045, November 1996.
+
+   [RFC2046]         Freed, N. and N. Borenstein, "Multipurpose Internet
+                     Mail Extensions (MIME) Part Two: Media Types",
+                     RFC 2046, November 1996.
+
+
+
+
+
+Resnick                     Standards Track                    [Page 55]
+
+RFC 5322                Internet Message Format             October 2008
+
+
+   [RFC2047]         Moore, K., "MIME (Multipurpose Internet Mail
+                     Extensions) Part Three: Message Header Extensions
+                     for Non-ASCII Text", RFC 2047, November 1996.
+
+   [RFC2049]         Freed, N. and N. Borenstein, "Multipurpose Internet
+                     Mail Extensions (MIME) Part Five: Conformance
+                     Criteria and Examples", RFC 2049, November 1996.
+
+   [RFC2822]         Resnick, P., "Internet Message Format", RFC 2822,
+                     April 2001.
+
+   [RFC3864]         Klyne, G., Nottingham, M., and J. Mogul,
+                     "Registration Procedures for Message Header
+                     Fields", BCP 90, RFC 3864, September 2004.
+
+   [RFC4021]         Klyne, G. and J. Palme, "Registration of Mail and
+                     MIME Header Fields", RFC 4021, March 2005.
+
+   [RFC4288]         Freed, N. and J. Klensin, "Media Type
+                     Specifications and Registration Procedures",
+                     BCP 13, RFC 4288, December 2005.
+
+   [RFC4289]         Freed, N. and J. Klensin, "Multipurpose Internet
+                     Mail Extensions (MIME) Part Four: Registration
+                     Procedures", BCP 13, RFC 4289, December 2005.
+
+   [RFC5321]         Klensin, J., "Simple Mail Transfer Protocol",
+                     RFC 5321, October 2008.
+
+Author's Address
+
+   Peter W. Resnick (editor)
+   Qualcomm Incorporated
+   5775 Morehouse Drive
+   San Diego, CA  92121-1714
+   US
+
+   Phone: +1 858 651 4478
+   EMail: presnick@qualcomm.com
+   URI:   http://www.qualcomm.com/~presnick/
+
+
+
+
+
+
+
+
+
+
+
+Resnick                     Standards Track                    [Page 56]
+
+RFC 5322                Internet Message Format             October 2008
+
+
+Full Copyright Statement
+
+   Copyright (C) The IETF Trust (2008).
+
+   This document is subject to the rights, licenses and restrictions
+   contained in BCP 78, and except as set forth therein, the authors
+   retain all their rights.
+
+   This document and the information contained herein are provided on an
+   "AS IS" basis and THE CONTRIBUTOR, THE ORGANIZATION HE/SHE REPRESENTS
+   OR IS SPONSORED BY (IF ANY), THE INTERNET SOCIETY, THE IETF TRUST AND
+   THE INTERNET ENGINEERING TASK FORCE DISCLAIM ALL WARRANTIES, EXPRESS
+   OR IMPLIED, INCLUDING BUT NOT LIMITED TO ANY WARRANTY THAT THE USE OF
+   THE INFORMATION HEREIN WILL NOT INFRINGE ANY RIGHTS OR ANY IMPLIED
+   WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
+
+Intellectual Property
+
+   The IETF takes no position regarding the validity or scope of any
+   Intellectual Property Rights or other rights that might be claimed to
+   pertain to the implementation or use of the technology described in
+   this document or the extent to which any license under such rights
+   might or might not be available; nor does it represent that it has
+   made any independent effort to identify any such rights.  Information
+   on the procedures with respect to rights in RFC documents can be
+   found in BCP 78 and BCP 79.
+
+   Copies of IPR disclosures made to the IETF Secretariat and any
+   assurances of licenses to be made available, or the result of an
+   attempt made to obtain a general license or permission for the use of
+   such proprietary rights by implementers or users of this
+   specification can be obtained from the IETF on-line IPR repository at
+   http://www.ietf.org/ipr.
+
+   The IETF invites any interested party to bring to its attention any
+   copyrights, patents or patent applications, or other proprietary
+   rights that may cover technology that may be required to implement
+   this standard.  Please address the information to the IETF at
+   ietf-ipr@ietf.org.
+
+
+
+
+
+
+
+
+
+
+
+
+Resnick                     Standards Track                    [Page 57]
+
+
+
